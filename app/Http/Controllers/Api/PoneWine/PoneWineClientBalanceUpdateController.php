@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-use App\Models\PoneWineBet;
-use App\Models\PoneWineBetInfo;
-use App\Models\PoneWinePlayerBet;
 use App\Models\PoneWineTransaction;
 use Bavix\Wallet\External\Dto\Extra; 
 use Bavix\Wallet\External\Dto\Option; 
@@ -65,12 +62,7 @@ class PoneWineClientBalanceUpdateController extends Controller
         try {
             DB::beginTransaction();
 
-            // Idempotency Check (CRITICAL) - Check if match already exists
-            if (PoneWineBet::where('match_id', $validated['matchId'])->exists()) {
-                DB::commit();
-                Log::info('ClientSite: Duplicate match_id received, skipping processing.', ['match_id' => $validated['matchId']]);
-                return response()->json(['status' => 'success', 'code' => 'ALREADY_PROCESSED', 'message' => 'Match already processed.'], 200);
-            }
+            
 
             $responseData = [];
 
