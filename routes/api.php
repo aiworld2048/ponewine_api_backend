@@ -49,6 +49,7 @@ Route::prefix('buffalo')->group(function () {
         Route::get('/game-auth', [BuffaloGameController::class, 'generateGameAuth']);
         Route::post('/game-url', [BuffaloGameController::class, 'generateGameUrl']);
         Route::post('/launch-game', [BuffaloGameController::class, 'launchGame']);
+        Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
     });
 });
 

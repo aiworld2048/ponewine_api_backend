@@ -47,11 +47,13 @@ async function apiRequest(endpoint, options = {}) {
             throw new Error('Server returned invalid JSON. Status: ' + response.status);
         }
         
-        // Check if response is successful
+        // Check if response is successful (HTTP status)
         if (!response.ok) {
-            throw new Error(data.msg || data.message || `Request failed with status ${response.status}`);
+            // Handle Laravel error response
+            throw new Error(data.message || data.msg || `Request failed with status ${response.status}`);
         }
         
+        // Return the data (Laravel format)
         return data;
     } catch (error) {
         console.error('API Request Error:', {

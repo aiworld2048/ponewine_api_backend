@@ -23,7 +23,9 @@ async function initializeLobby() {
         // Get game authentication data (includes balance and available rooms)
         const response = await getBuffaloGameAuth();
         
-        if (response.code === 1 && response.data) {
+        console.log('Game auth response:', response);
+        
+        if (response.data) {
             userBalance = response.data.user_balance || 0;
             
             // Update balance display
@@ -91,7 +93,9 @@ async function launchGame(roomId) {
         // Call launch game API
         const response = await launchBuffaloGame(roomId);
         
-        if (response.code === 1 && response.game_url) {
+        console.log('Launch game response:', response);
+        
+        if (response.game_url || (response.data && response.data.game_url)) {
             launchMessage.textContent = 'Launching game...';
             
             // Save selected room
@@ -100,11 +104,18 @@ async function launchGame(roomId) {
                 roomInfo: ROOM_CONFIG[roomId],
             }));
             
-            // Redirect to game page with URL parameter
-            const gameUrl = encodeURIComponent(response.game_url);
-            window.location.href = `game.html?url=${gameUrl}`;
+            // Get game URL from response
+            const gameUrl = response.game_url || response.data?.game_url || response.Url;
+            
+            if (gameUrl) {
+                // Redirect to game page with URL parameter
+                const encodedUrl = encodeURIComponent(gameUrl);
+                window.location.href = `game.html?url=${encodedUrl}`;
+            } else {
+                throw new Error('No game URL in response');
+            }
         } else {
-            throw new Error(response.msg || 'Failed to launch game');
+            throw new Error(response.message || response.msg || 'Failed to launch game');
         }
     } catch (error) {
         console.error('Error launching game:', error);

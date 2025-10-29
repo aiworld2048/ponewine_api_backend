@@ -10,9 +10,9 @@ class BuffaloGameService
     /**
      * Site configuration for TriBet
      */
-    private const SITE_NAME = 'gamestar77.online';
+    private const SITE_NAME = 'https://moneyking77.online';
     private const SITE_PREFIX = 'gm7';
-    private const SITE_URL = 'https://gamestar77.online';
+    private const SITE_URL = 'https://moneyking77.online';
 
     /**
      * Generate UID (32 characters) for Buffalo API

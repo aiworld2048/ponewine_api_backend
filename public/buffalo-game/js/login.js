@@ -26,19 +26,21 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         // Call login API
         const response = await loginAPI(username, password);
         
-        // Check if login was successful
-        if (response.code === 1 && response.data) {
+        console.log('Login response:', response);
+        
+        // Check if login was successful (Laravel format: response.data contains user info)
+        if (response.data && response.data.token) {
             // Save token and user data
             saveToken(response.data.token);
-            saveUser(response.data.user);
+            saveUser(response.data);
             
             // Show success message
-            console.log('Login successful!');
+            console.log('Login successful!', response.data);
             
             // Redirect to lobby
             window.location.href = 'lobby.html';
         } else {
-            throw new Error(response.msg || 'Login failed');
+            throw new Error(response.message || 'Login failed');
         }
     } catch (error) {
         console.error('Login error:', error);
