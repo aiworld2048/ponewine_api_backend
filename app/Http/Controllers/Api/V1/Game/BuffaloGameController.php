@@ -431,7 +431,7 @@ class BuffaloGameController extends Controller
                 $roomConfig = $availableRooms[$roomId];
                 
                 // Generate Buffalo game URL (Production - HTTP as per provider format)
-                $lobbyUrl = 'https://m.6tribet.net';
+                $lobbyUrl = 'https://gamestar77.online';
                 $gameUrl = BuffaloGameService::generateGameUrl($user, $roomId, $lobbyUrl);
                 
                 // Add UID and token to the URL (exact provider format)

@@ -6,6 +6,12 @@
 async function apiRequest(endpoint, options = {}) {
     const url = API_CONFIG.BASE_URL + endpoint;
     
+    console.log('API Request:', {
+        url: url,
+        method: options.method || 'GET',
+        endpoint: endpoint
+    });
+    
     const defaultOptions = {
         method: 'GET',
         headers: {
@@ -25,16 +31,34 @@ async function apiRequest(endpoint, options = {}) {
     
     try {
         const response = await fetch(url, mergedOptions);
-        const data = await response.json();
+        
+        console.log('API Response:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: url
+        });
+        
+        // Try to parse JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            console.error('Failed to parse JSON response:', e);
+            throw new Error('Server returned invalid JSON. Status: ' + response.status);
+        }
         
         // Check if response is successful
         if (!response.ok) {
-            throw new Error(data.msg || data.message || 'Request failed');
+            throw new Error(data.msg || data.message || `Request failed with status ${response.status}`);
         }
         
         return data;
     } catch (error) {
-        console.error('API Request Error:', error);
+        console.error('API Request Error:', {
+            message: error.message,
+            url: url,
+            endpoint: endpoint
+        });
         throw error;
     }
 }

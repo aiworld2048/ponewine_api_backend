@@ -1,7 +1,7 @@
 // API Configuration
 const API_CONFIG = {
     // Update this to your API base URL
-    BASE_URL: window.location.origin + '/api',
+    BASE_URL: 'https://gamestar77.online/api',
     
     // API Endpoints
     ENDPOINTS: {
