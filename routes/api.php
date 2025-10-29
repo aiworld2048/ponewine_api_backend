@@ -52,8 +52,13 @@ Route::prefix('buffalo')->group(function () {
         // Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
     });
 
-     Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
+    //  Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
 });
+
+// Buffalo Game Proxy Routes (NO AUTH - called from game iframe)
+Route::get('/buffalo/proxy-game', [BuffaloGameController::class, 'proxyGame']);
+Route::get('/buffalo/proxy-resource', [BuffaloGameController::class, 'proxyResource']);
+
 
 
 

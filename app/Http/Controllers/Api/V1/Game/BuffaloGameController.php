@@ -475,7 +475,10 @@ class BuffaloGameController extends Controller
         }
     }
 
-    public function proxyGame(Request $request)
+    /**
+ * Proxy Game Content and Resources - Complete HTTPS Solution
+ */
+public function proxyGame(Request $request)
 {
     $gameUrl = $request->query('url');
     
@@ -495,77 +498,83 @@ class BuffaloGameController extends Controller
     }
     
     try {
-        // Fetch the game content from HTTP server
+        // Fetch the content from HTTP server
         $response = \Illuminate\Support\Facades\Http::timeout(30)
             ->withOptions(['verify' => false])
             ->get($gameUrl);
         
         if (!$response->successful()) {
-            Log::error('Buffalo Proxy - Failed to fetch game', [
+            Log::error('Buffalo Proxy - Failed to fetch', [
                 'url' => $gameUrl,
                 'status' => $response->status()
             ]);
             
             return response()->json([
-                'error' => 'Failed to fetch game',
+                'error' => 'Failed to fetch resource',
                 'status' => $response->status()
-            ], $response->status());
+            ], $response->status() ?: 500);
         }
         
         // Get content
         $content = $response->body();
-        $contentType = $response->header('Content-Type') ?? 'text/html';
+        $contentType = $response->header('Content-Type') ?? 'application/octet-stream';
         
-        // If it's HTML, add a base tag so relative URLs work correctly
+        // If it's HTML, rewrite all HTTP URLs to go through proxy
         if (strpos($contentType, 'text/html') !== false) {
-            // Extract the base URL (domain) from the game URL
-            $parsedUrl = parse_url($gameUrl);
-            $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+            $gameServerUrl = 'http://prime7.wlkfkskakdf.com';
+            $proxyBaseUrl = url('/api/buffalo/proxy-resource?url=');
             
-            // Add base tag after <head> to fix relative URLs
-            $baseTag = '<base href="' . $baseUrl . '/">';
+            // Replace all absolute URLs pointing to game server
+            // This covers: href="http://...", src="http://...", url('http://...'), etc.
+            $content = str_replace(
+                $gameServerUrl,
+                $proxyBaseUrl . urlencode($gameServerUrl),
+                $content
+            );
             
-            // Try to inject after <head> tag
-            if (stripos($content, '<head>') !== false) {
-                $content = preg_replace(
-                    '/(<head[^>]*>)/i',
-                    '$1' . $baseTag,
-                    $content,
-                    1
-                );
-            } elseif (stripos($content, '<html>') !== false) {
-                // If no head tag, add one
-                $content = preg_replace(
-                    '/(<html[^>]*>)/i',
-                    '$1<head>' . $baseTag . '</head>',
-                    $content,
-                    1
-                );
-            } else {
-                // Last resort: add at the beginning
-                $content = $baseTag . $content;
-            }
+            // Also handle protocol-relative URLs (//prime7.wlkfkskakdf.com)
+            $content = str_replace(
+                '//prime7.wlkfkskakdf.com',
+                $proxyBaseUrl . urlencode('http://prime7.wlkfkskakdf.com'),
+                $content
+            );
             
-            Log::info('Buffalo Proxy - Added base tag to HTML', [
+            Log::info('Buffalo Proxy - Rewrote URLs in HTML', [
                 'url' => $gameUrl,
-                'base_url' => $baseUrl
+                'content_length' => strlen($content)
             ]);
         }
         
-        Log::info('Buffalo Proxy - Successfully proxied game', [
+        // For CSS files, also rewrite URLs
+        if (strpos($contentType, 'text/css') !== false) {
+            $gameServerUrl = 'http://prime7.wlkfkskakdf.com';
+            $proxyBaseUrl = url('/api/buffalo/proxy-resource?url=');
+            
+            // Replace URLs in CSS (url('...'), url("..."), url(...))
+            $content = preg_replace_callback(
+                '/url\(["\']?(http:\/\/prime7\.wlkfkskakdf\.com[^"\')]*)["\']?\)/i',
+                function($matches) use ($proxyBaseUrl) {
+                    return 'url("' . $proxyBaseUrl . urlencode($matches[1]) . '")';
+                },
+                $content
+            );
+        }
+        
+        Log::info('Buffalo Proxy - Successfully proxied', [
             'url' => $gameUrl,
-            'content_length' => strlen($content),
-            'content_type' => $contentType
+            'content_type' => $contentType,
+            'content_length' => strlen($content)
         ]);
         
-        // Return the game content with headers that allow iframe embedding
+        // Return the content with headers that allow iframe embedding
         return response($content, 200)
             ->header('Content-Type', $contentType)
             ->header('X-Frame-Options', 'ALLOWALL')
             ->header('Content-Security-Policy', 'frame-ancestors *')
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', '*')
-            ->header('Access-Control-Allow-Headers', '*');
+            ->header('Access-Control-Allow-Headers', '*')
+            ->header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
             
     } catch (\Exception $e) {
         Log::error('Buffalo Proxy - Error', [
@@ -580,5 +589,38 @@ class BuffaloGameController extends Controller
         ], 500);
     }
 }
+
+/**
+ * Proxy game resources (CSS, JS, images, etc.)
+ * This is called by the rewritten URLs in the HTML
+ */
+public function proxyResource(Request $request)
+{
+    $resourceUrl = $request->query('url');
+    
+    if (!$resourceUrl) {
+        return response()->json(['error' => 'No URL provided'], 400);
+    }
+    
+    // Validate it's the game server
+    if (!str_starts_with($resourceUrl, 'http://prime7.wlkfkskakdf.com')) {
+        return response()->json(['error' => 'Invalid URL'], 403);
+    }
+    
+    try {
+        // Use the main proxy method to handle the resource
+        $request->merge(['url' => $resourceUrl]);
+        return $this->proxyGame($request);
+        
+    } catch (\Exception $e) {
+        Log::error('Buffalo Proxy Resource - Error', [
+            'url' => $resourceUrl,
+            'error' => $e->getMessage()
+        ]);
+        
+        return response('', 404);
+    }
+}
+
 
 }
