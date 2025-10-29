@@ -519,10 +519,18 @@ public function proxyGame(Request $request)
         $content = $response->body();
         $contentType = $response->header('Content-Type') ?? 'application/octet-stream';
         
-        // If it's HTML, rewrite all HTTP URLs to go through proxy
+        // If it's HTML, rewrite all URLs to go through proxy
         if (strpos($contentType, 'text/html') !== false) {
             $gameServerUrl = 'http://prime7.wlkfkskakdf.com';
             $proxyBaseUrl = url('/api/buffalo/proxy-resource?url=');
+            
+            // Add base tag to handle relative URLs
+            $baseTag = '<base href="' . $proxyBaseUrl . urlencode($gameServerUrl . '/') . '">';
+            if (preg_match('/<head[^>]*>/i', $content)) {
+                $content = preg_replace('/<head[^>]*>/i', '$0' . $baseTag, $content, 1);
+            } else {
+                $content = $baseTag . $content;
+            }
             
             // Replace all absolute URLs pointing to game server
             // This covers: href="http://...", src="http://...", url('http://...'), etc.
@@ -536,6 +544,16 @@ public function proxyGame(Request $request)
             $content = str_replace(
                 '//prime7.wlkfkskakdf.com',
                 $proxyBaseUrl . urlencode('http://prime7.wlkfkskakdf.com'),
+                $content
+            );
+            
+            // Handle relative paths that start with / (root-relative)
+            $content = preg_replace_callback(
+                '/(src|href)=["\']\/([^"\']*)["\']/',
+                function($matches) use ($proxyBaseUrl, $gameServerUrl) {
+                    $path = $matches[2];
+                    return $matches[1] . '="' . $proxyBaseUrl . urlencode($gameServerUrl . '/' . $path) . '"';
+                },
                 $content
             );
             

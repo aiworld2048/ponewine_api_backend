@@ -68,11 +68,11 @@ BUFFALO_PROVIDER_ID: 23,  // Update if your provider ID is different
 
 ### Test Accounts
 
-Default password: **buffalovip**
+Default password: **ponewine**
 
 - **Owner**: Username: `O`
 - **Agent**: Username: `AG1`, `AG2`, `AG3`
-- **Player**: Username: `PLAYER0101` - `PLAYER0304`, `SKP0101`
+- **Player**: Username: `PLY101` - `PLY304`, `SKP0101`
 
 ## 🎯 User Flow
 
