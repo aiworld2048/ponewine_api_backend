@@ -246,7 +246,7 @@ class BuffaloGameService
         $gameId = 23; // Buffalo game ID from provider examples
         
         // Use provided lobby URL or default to production site
-        $finalLobbyUrl = $lobbyUrl ?: 'https://m.6tribet.net';
+        $finalLobbyUrl = $lobbyUrl ?: 'https://buffalo-slot-game.vercel.app';
         
         // Generate the base URL without auth (auth will be added by controller)
         $gameUrl = $baseUrl . '?gameId=' . $gameId . 
