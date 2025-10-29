@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buffalo Game - Lobby</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <img src="img/logo.png" alt="Logo" style="height: 40px; margin-right: 15px;">
+                <h1>🎰 Buffalo Game Lobby</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="username" id="userName">Loading...</span>
+                    <span class="balance">Balance: <strong id="userBalance">0</strong> MMK</span>
+                </div>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <div class="lobby-content">
+            <div class="welcome-banner">
+                <h2>Welcome to Buffalo Game! 🎉</h2>
+                <p>Choose your room based on your balance and start playing!</p>
+            </div>
+
+            <div class="rooms-grid" id="roomsGrid">
+                <!-- Rooms will be loaded dynamically -->
+                <div class="loading-spinner">
+                    <div class="spinner-large">⏳</div>
+                    <p>Loading rooms...</p>
+                </div>
+            </div>
+
+            <div class="game-rules">
+                <h3>📋 Game Rules</h3>
+                <ul>
+                    <li>Select a room based on your current balance</li>
+                    <li>Each room has a minimum bet requirement</li>
+                    <li>Higher rooms offer bigger wins!</li>
+                    <li>Your balance updates in real-time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Launch Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeGameModal()">&times;</span>
+            <div class="modal-body">
+                <h2>🎮 Launching Buffalo Game...</h2>
+                <p id="launchMessage">Please wait while we prepare your game...</p>
+                <div class="loading-spinner">
+                    <div class="spinner-large">⏳</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/lobby.js"></script>
+</body>
+</html>
+
