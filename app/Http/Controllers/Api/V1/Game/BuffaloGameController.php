@@ -477,7 +477,6 @@ class BuffaloGameController extends Controller
 
     public function proxyGame(Request $request)
 {
-    // Get the game URL from query parameter
     $gameUrl = $request->query('url');
     
     if (!$gameUrl) {
@@ -496,9 +495,9 @@ class BuffaloGameController extends Controller
     }
     
     try {
-        // Fetch the game content from HTTP server (server-side, no mixed content)
+        // Fetch the game content from HTTP server
         $response = \Illuminate\Support\Facades\Http::timeout(30)
-            ->withOptions(['verify' => false]) // In case of SSL issues
+            ->withOptions(['verify' => false])
             ->get($gameUrl);
         
         if (!$response->successful()) {
@@ -517,9 +516,46 @@ class BuffaloGameController extends Controller
         $content = $response->body();
         $contentType = $response->header('Content-Type') ?? 'text/html';
         
+        // If it's HTML, add a base tag so relative URLs work correctly
+        if (strpos($contentType, 'text/html') !== false) {
+            // Extract the base URL (domain) from the game URL
+            $parsedUrl = parse_url($gameUrl);
+            $baseUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'];
+            
+            // Add base tag after <head> to fix relative URLs
+            $baseTag = '<base href="' . $baseUrl . '/">';
+            
+            // Try to inject after <head> tag
+            if (stripos($content, '<head>') !== false) {
+                $content = preg_replace(
+                    '/(<head[^>]*>)/i',
+                    '$1' . $baseTag,
+                    $content,
+                    1
+                );
+            } elseif (stripos($content, '<html>') !== false) {
+                // If no head tag, add one
+                $content = preg_replace(
+                    '/(<html[^>]*>)/i',
+                    '$1<head>' . $baseTag . '</head>',
+                    $content,
+                    1
+                );
+            } else {
+                // Last resort: add at the beginning
+                $content = $baseTag . $content;
+            }
+            
+            Log::info('Buffalo Proxy - Added base tag to HTML', [
+                'url' => $gameUrl,
+                'base_url' => $baseUrl
+            ]);
+        }
+        
         Log::info('Buffalo Proxy - Successfully proxied game', [
             'url' => $gameUrl,
-            'content_length' => strlen($content)
+            'content_length' => strlen($content),
+            'content_type' => $contentType
         ]);
         
         // Return the game content with headers that allow iframe embedding
@@ -534,7 +570,8 @@ class BuffaloGameController extends Controller
     } catch (\Exception $e) {
         Log::error('Buffalo Proxy - Error', [
             'url' => $gameUrl,
-            'error' => $e->getMessage()
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ]);
         
         return response()->json([
@@ -543,4 +580,5 @@ class BuffaloGameController extends Controller
         ], 500);
     }
 }
+
 }
