@@ -1,0 +1,23 @@
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl status postgresql
+CREATE DATABASE shan_demo_db;
+CREATE USER shan_demo_db_user WITH PASSWORD 'luckymillion';
+GRANT ALL PRIVILEGES ON DATABASE shan TO shan_demo_db_user;
+ALTER USER shan_demo_db_user WITH PASSWORD 'luckymillion';
+
+sudo -i -u postgres
+psql -d shan_demo_db
+
+psql -h 127.0.0.1 -U shan_demo_db_user -d shan_demo_db
+
+GRANT ALL ON SCHEMA public TO shan_demo_db_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO shan_demo_db_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO shan_demo_db_user;
+
+sudo -i -u postgres
+psql -d ponewine_db
+ALTER SCHEMA public OWNER TO shan_demo_db_user;
+
+pm2 start yarn --name "w2b1_next_slot" -- start
+pm2 startup
+pm2 save
