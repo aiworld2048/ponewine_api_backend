@@ -10,9 +10,9 @@ class BuffaloGameService
     /**
      * Site configuration for TriBet
      */
-    private const SITE_NAME = 'https://moneyking77.online';
-    private const SITE_PREFIX = 'gm7';
-    private const SITE_URL = 'https://moneyking77.online';
+    private const SITE_NAME = 'https://buffalo.meemeegamecenter.com';
+    private const SITE_PREFIX = 'az9'; // az9
+    private const SITE_URL = 'https://buffalo.meemeegamecenter.com';
 
     /**
      * Generate UID (32 characters) for Buffalo API
@@ -246,7 +246,7 @@ class BuffaloGameService
         $gameId = 23; // Buffalo game ID from provider examples
         
         // Use provided lobby URL or default to production site
-        $finalLobbyUrl = $lobbyUrl ?: 'https://buffalo-slot-game.vercel.app';
+        $finalLobbyUrl = $lobbyUrl ?: 'https://buffalo.meemeegamecenter.com';
         
         // Generate the base URL without auth (auth will be added by controller)
         $gameUrl = $baseUrl . '?gameId=' . $gameId . 
