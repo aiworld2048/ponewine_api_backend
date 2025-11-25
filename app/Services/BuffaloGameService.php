@@ -307,13 +307,33 @@ class BuffaloGameService
             
             if (!$response->successful()) {
                 $errorBody = $response->body();
+                $statusCode = $response->status();
+                
+                // Get server IP for debugging
+                $serverIp = $_SERVER['SERVER_ADDR'] ?? 'unknown';
+                $requestIp = request()->ip() ?? 'unknown';
+                
                 Log::error('Buffalo Game Login API - Failed', [
-                    'status' => $response->status(),
+                    'status' => $statusCode,
                     'response' => $errorBody,
                     'user' => $user->user_name,
+                    'server_ip' => $serverIp,
+                    'request_ip' => $requestIp,
+                    'api_url' => $apiUrl,
+                    'payload' => array_merge($payload, ['token' => substr($token, 0, 10) . '...']),
                 ]);
                 
-                throw new \Exception("Game Login API failed: HTTP {$response->status()} - {$errorBody}");
+                // Provide more helpful error messages based on status code
+                if ($statusCode === 403) {
+                    $errorMessage = "Game Login API rejected request: IP address not whitelisted. ";
+                    $errorMessage .= "Your server IP ({$serverIp}) needs to be whitelisted by the provider. ";
+                    $errorMessage .= "Contact provider to add your IP to their whitelist.";
+                    throw new \Exception($errorMessage);
+                } elseif ($statusCode === 401) {
+                    throw new \Exception("Game Login API authentication failed. Check your domain and credentials.");
+                } else {
+                    throw new \Exception("Game Login API failed: HTTP {$statusCode} - {$errorBody}");
+                }
             }
             
             $responseData = $response->json();
