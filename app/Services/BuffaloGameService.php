@@ -10,9 +10,9 @@ class BuffaloGameService
     /**
      * Site configuration for TriBet
      */
-    private const SITE_NAME = 'https://buffalo.meemeegamecenter.com';
-    private const SITE_PREFIX = 'az9'; // az9
-    private const SITE_URL = 'https://buffalo.meemeegamecenter.com';
+    private const SITE_NAME = 'https://maxwinmyanmar.pro';
+    private const SITE_PREFIX = 'mxm'; // az9
+    private const SITE_URL = 'https://maxwinmyanmar.pro';
 
     /**
      * Generate UID (32 characters) for Buffalo API
@@ -284,6 +284,14 @@ class BuffaloGameService
         }
 
         return $availableRooms;
+    }
+
+    public static function getSiteInfo(): array
+    {
+        return [
+            'site_name' => self::SITE_NAME,
+            'site_prefix' => self::SITE_PREFIX,
+        ];
     }
 
     
