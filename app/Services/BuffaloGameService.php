@@ -64,16 +64,18 @@ class BuffaloGameService
 
     /**
      * Verify token
+     * Handles case-insensitive UID matching (game server may lowercase UID in URLs)
      */
     public static function verifyToken(string $uid, string $token): bool
     {
         try {
-            // Extract username from UID
+            // Extract username from UID (handles case-insensitive matching)
             $userName = self::extractUserNameFromUid($uid);
             
             if (!$userName) {
                 Log::warning('TriBet Buffalo - Could not extract username from UID', [
-                    'uid' => $uid
+                    'uid' => $uid,
+                    'uid_length' => strlen($uid)
                 ]);
                 return false;
             }
@@ -83,25 +85,38 @@ class BuffaloGameService
             
             if (!$user) {
                 Log::warning('TriBet Buffalo - User not found for token verification', [
-                    'userName' => $userName
+                    'userName' => $userName,
+                    'uid' => $uid
                 ]);
                 return false;
             }
 
-            // Generate expected token
+            // Generate expected token (based on username, not UID)
             $expectedToken = self::generatePersistentToken($userName);
+            
+            // Also generate expected UID for comparison
+            $expectedUid = self::generateUid($userName);
 
             $isValid = hash_equals($expectedToken, $token);
+            
+            // Log UID comparison for debugging
+            $uidMatches = ($uid === $expectedUid || strtolower($uid) === strtolower($expectedUid));
 
             if ($isValid) {
                 Log::info('TriBet Buffalo - Token verified successfully', [
-                    'user' => $userName
+                    'user' => $userName,
+                    'uid_match' => $uidMatches,
+                    'uid_received' => $uid,
+                    'uid_expected' => $expectedUid
                 ]);
             } else {
                 Log::warning('TriBet Buffalo - Token verification failed', [
                     'user' => $userName,
-                    'expected' => substr($expectedToken, 0, 10) . '...',
-                    'received' => substr($token, 0, 10) . '...'
+                    'expected_token' => substr($expectedToken, 0, 20) . '...' . substr($expectedToken, -10),
+                    'received_token' => substr($token, 0, 20) . '...' . substr($token, -10),
+                    'uid_match' => $uidMatches,
+                    'uid_received' => $uid,
+                    'uid_expected' => $expectedUid
                 ]);
             }
 
@@ -110,7 +125,8 @@ class BuffaloGameService
         } catch (\Exception $e) {
             Log::error('TriBet Buffalo - Token verification error', [
                 'error' => $e->getMessage(),
-                'uid' => $uid
+                'uid' => $uid,
+                'trace' => $e->getTraceAsString()
             ]);
             return false;
         }
@@ -121,30 +137,60 @@ class BuffaloGameService
      */
     public static function extractUserNameFromUid(string $uid): ?string
     {
-        // Remove prefix (first 3 characters: "6t")
-        $uidWithoutPrefix = substr($uid, 3);
+        // Get prefix from config or constant
+        $prefix = Config::get('buffalo.site.prefix', self::SITE_PREFIX);
+        $prefixLength = strlen($prefix);
+        
+        // Validate UID starts with prefix
+        if (substr($uid, 0, $prefixLength) !== $prefix) {
+            Log::warning('TriBet Buffalo - UID does not start with expected prefix', [
+                'uid' => $uid,
+                'expected_prefix' => $prefix,
+                'actual_prefix' => substr($uid, 0, $prefixLength)
+            ]);
+            // Try without prefix check (maybe prefix changed)
+        }
+        
+        // Remove prefix
+        $uidWithoutPrefix = substr($uid, $prefixLength);
         
         // Try to decode the base64 encoded part
         try {
             // Find the encoded username part (before the hash padding)
+            // Start from full length and work backwards
             for ($len = strlen($uidWithoutPrefix); $len >= 4; $len--) {
                 $encodedPart = substr($uidWithoutPrefix, 0, $len);
                 
-                // Add back padding if needed
+                // Add back padding if needed for base64
                 $paddedEncoded = $encodedPart . str_repeat('=', (4 - strlen($encodedPart) % 4) % 4);
                 
-                // Try to decode
+                // Try to decode (URL-safe base64)
                 $decoded = base64_decode(strtr($paddedEncoded, '-_', '+/'), true);
                 
-                if ($decoded !== false) {
+                if ($decoded !== false && $decoded !== '') {
                     // Clean the decoded string - remove any non-printable characters
-                    $cleaned = preg_replace('/[^\x20-\x7E]/', '', $decoded);
+                    $cleaned = trim(preg_replace('/[^\x20-\x7E]/', '', $decoded));
                     
-                    if (!empty($cleaned)) {
+                    if (!empty($cleaned) && strlen($cleaned) >= 3) {
                         // Check if this username exists (use cleaned string)
                         $user = User::where('user_name', $cleaned)->first();
                         if ($user) {
+                            Log::info('TriBet Buffalo - Successfully extracted username from UID', [
+                                'uid' => $uid,
+                                'extracted_username' => $cleaned
+                            ]);
                             return $cleaned;
+                        }
+                        
+                        // Also try case-insensitive match
+                        $user = User::whereRaw('LOWER(user_name) = ?', [strtolower($cleaned)])->first();
+                        if ($user) {
+                            Log::info('TriBet Buffalo - Successfully extracted username from UID (case-insensitive)', [
+                                'uid' => $uid,
+                                'extracted_username' => $user->user_name,
+                                'matched_cleaned' => $cleaned
+                            ]);
+                            return $user->user_name;
                         }
                     }
                 }
@@ -156,13 +202,43 @@ class BuffaloGameService
             ]);
         }
 
-        // Fallback: Search by UID pattern in database
+        // Fallback: Search by generating UID for all users and comparing
+        // This is more reliable but slower - use caching if needed
+        // Also handle case-insensitive matching (game server might lowercase UID)
         try {
-            $users = User::select('id', 'user_name')->get();
-            foreach ($users as $user) {
-                $generatedUid = self::generateUid($user->user_name);
-                if ($generatedUid === $uid) {
-                    return $user->user_name;
+            Log::info('TriBet Buffalo - Using fallback UID search', [
+                'uid' => $uid,
+                'uid_length' => strlen($uid)
+            ]);
+            
+            // Try to optimize: only search users that might match
+            // Check if UID length matches expected format
+            if (strlen($uid) === 32) {
+                $users = User::select('id', 'user_name')
+                    ->whereNotNull('user_name')
+                    ->where('user_name', '!=', '')
+                    ->get();
+                
+                foreach ($users as $user) {
+                    $generatedUid = self::generateUid($user->user_name);
+                    // Case-sensitive match first (most common)
+                    if ($generatedUid === $uid) {
+                        Log::info('TriBet Buffalo - Found username via fallback search (exact match)', [
+                            'uid' => $uid,
+                            'username' => $user->user_name
+                        ]);
+                        return $user->user_name;
+                    }
+                    // Case-insensitive match (game server might lowercase UID in URL)
+                    if (strtolower($generatedUid) === strtolower($uid)) {
+                        Log::info('TriBet Buffalo - Found username via fallback search (case-insensitive match)', [
+                            'uid' => $uid,
+                            'generated_uid' => $generatedUid,
+                            'username' => $user->user_name,
+                            'note' => 'UID case mismatch detected - game server may have lowercased UID'
+                        ]);
+                        return $user->user_name;
+                    }
                 }
             }
         } catch (\Exception $e) {
@@ -171,6 +247,12 @@ class BuffaloGameService
                 'error' => $e->getMessage()
             ]);
         }
+
+        Log::warning('TriBet Buffalo - Could not extract username from UID', [
+            'uid' => $uid,
+            'uid_length' => strlen($uid),
+            'prefix' => $prefix
+        ]);
 
         return null;
     }

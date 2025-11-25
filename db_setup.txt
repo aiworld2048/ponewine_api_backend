@@ -18,6 +18,5 @@ sudo -i -u postgres
 psql -d ponewine_db
 ALTER SCHEMA public OWNER TO shan_demo_db_user;
 
-pm2 start yarn --name "w2b1_next_slot" -- start
-pm2 startup
-pm2 save
+
+php -r "file_put_contents('/var/www/ponewine_api_backend/storage/logs/laravel.log', '');"
