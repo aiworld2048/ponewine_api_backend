@@ -12,9 +12,11 @@ class LogBuffaloBet extends Model
 
     protected $fillable = [
         'member_account',
+        'bet_uid',
         'player_id',
         'player_agent_id',
         'buffalo_game_id',
+        'room_id',
         'request_time',
         'bet_amount',
         'win_amount',

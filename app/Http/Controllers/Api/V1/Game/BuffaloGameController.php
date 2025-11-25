@@ -40,16 +40,47 @@ class BuffaloGameController extends Controller
         $uid = $request->uid;
         $token = $request->token;
 
+        // Log received payload for debugging
+        Log::info('GameStar77 Buffalo getUserBalance - Payload received', [
+            'received_uid' => $uid,
+            'received_token' => substr($token, 0, 20) . '...' . substr($token, -10), // Show first 20 and last 10 chars
+            'token_length' => strlen($token),
+            'ip' => $request->ip(),
+        ]);
+
+        // Extract username from UID first to generate expected values
+        $userName = BuffaloGameService::extractUserNameFromUid($uid);
+        
+        if ($userName) {
+            // Generate expected UID and token for comparison
+            $expectedUid = BuffaloGameService::generateUid($userName);
+            $expectedToken = BuffaloGameService::generatePersistentToken($userName);
+            
+            // Log expected values for debugging
+            Log::info('GameStar77 Buffalo getUserBalance - Expected values', [
+                'extracted_username' => $userName,
+                'expected_uid' => $expectedUid,
+                'expected_token' => substr($expectedToken, 0, 20) . '...' . substr($expectedToken, -10),
+                'uid_match' => $uid === $expectedUid,
+                'token_match' => hash_equals($expectedToken, $token),
+            ]);
+        } else {
+            Log::warning('GameStar77 Buffalo getUserBalance - Could not extract username from UID', [
+                'received_uid' => $uid,
+            ]);
+        }
+
         // Verify token
         Log::info('GameStar77 Buffalo - Token verification attempt', [
             'uid' => $uid,
-            'token' => $token
+            'token_preview' => substr($token, 0, 20) . '...'
         ]);
         
         if (!BuffaloGameService::verifyToken($uid, $token)) {
             Log::warning('GameStar77 Buffalo - Token verification failed', [
                 'uid' => $uid,
-                'token' => $token
+                'received_token' => substr($token, 0, 20) . '...' . substr($token, -10),
+                'extracted_username' => $userName ?? 'N/A',
             ]);
             
             return response()->json([
@@ -59,11 +90,9 @@ class BuffaloGameController extends Controller
         }
         
         Log::info('GameStar77 Buffalo - Token verification successful', [
-            'uid' => $uid
+            'uid' => $uid,
+            'username' => $userName
         ]);
-
-        // Extract username from UID
-        $userName = BuffaloGameService::extractUserNameFromUid($uid);
 
         if (!$userName) {
             Log::warning('GameStar77 Buffalo - Could not extract username', [
@@ -113,33 +142,82 @@ class BuffaloGameController extends Controller
      */
     public function changeBalance(Request $request)
     {
-        // Log::info('GameStar77 Buffalo changeBalance - Request received', [
-        //     'request' => $request->all(),
-        //     'ip' => $request->ip()
-        // ]);
+        Log::info('GameStar77 Buffalo changeBalance - Request received', [
+            'request' => $request->all(),
+            'ip' => $request->ip()
+        ]);
 
+        // Handle both form data and JSON (API docs specify form, but support both)
         $request->validate([
             'uid' => 'required|string|max:50',
+            'bet_uid' => 'required|string', // Unique bet identifier for idempotency
             'token' => 'required|string',
             'changemoney' => 'required|integer',
             'bet' => 'required|integer',
             'win' => 'required|integer',
-            'gameId' => 'required|integer',
+            'gameId' => 'nullable|integer', // Support both gameId and gameld
+            'gameld' => 'nullable|integer', // API docs typo, but handle it
+            'roomId' => 'nullable|integer', // Support both roomId and roomld
+            'roomld' => 'nullable|integer', // API docs typo, but handle it
         ]);
 
         $uid = $request->uid;
         $token = $request->token;
+        $betUid = $request->bet_uid;
+        
+        // Handle parameter name variations (gameld/gameId, roomld/roomId)
+        $gameId = $request->gameId ?? $request->gameld ?? null;
+        $roomId = $request->roomId ?? $request->roomld ?? null;
+
+        // Log received payload for debugging
+        Log::info('GameStar77 Buffalo changeBalance - Payload received', [
+            'received_uid' => $uid,
+            'received_token' => substr($token, 0, 20) . '...' . substr($token, -10), // Show first 20 and last 10 chars
+            'token_length' => strlen($token),
+            'bet_uid' => $betUid,
+            'changemoney' => $request->changemoney,
+            'bet' => $request->bet,
+            'win' => $request->win,
+            'game_id' => $gameId,
+            'room_id' => $roomId,
+            'ip' => $request->ip(),
+        ]);
+
+        // Extract username from UID first to generate expected values
+        $userName = BuffaloGameService::extractUserNameFromUid($uid);
+        
+        if ($userName) {
+            // Generate expected UID and token for comparison
+            $expectedUid = BuffaloGameService::generateUid($userName);
+            $expectedToken = BuffaloGameService::generatePersistentToken($userName);
+            
+            // Log expected values for debugging
+            Log::info('GameStar77 Buffalo changeBalance - Expected values', [
+                'extracted_username' => $userName,
+                'expected_uid' => $expectedUid,
+                'expected_token' => substr($expectedToken, 0, 20) . '...' . substr($expectedToken, -10),
+                'uid_match' => $uid === $expectedUid,
+                'token_match' => hash_equals($expectedToken, $token),
+            ]);
+        } else {
+            Log::warning('GameStar77 Buffalo changeBalance - Could not extract username from UID', [
+                'received_uid' => $uid,
+            ]);
+        }
 
         // Verify token
         Log::info('GameStar77 Buffalo - Token verification attempt', [
             'uid' => $uid,
-            'token' => $token
+            'token_preview' => substr($token, 0, 20) . '...',
+            'bet_uid' => $betUid
         ]);
         
         if (!BuffaloGameService::verifyToken($uid, $token)) {
             Log::warning('GameStar77 Buffalo - Token verification failed', [
                 'uid' => $uid,
-                'token' => $token
+                'received_token' => substr($token, 0, 20) . '...' . substr($token, -10),
+                'extracted_username' => $userName ?? 'N/A',
+                'bet_uid' => $betUid,
             ]);
             
             return response()->json([
@@ -149,11 +227,10 @@ class BuffaloGameController extends Controller
         }
         
         Log::info('GameStar77 Buffalo - Token verification successful', [
-            'uid' => $uid
+            'uid' => $uid,
+            'username' => $userName,
+            'bet_uid' => $betUid
         ]);
-
-        // Extract username from UID
-        $userName = BuffaloGameService::extractUserNameFromUid($uid);
 
         if (!$userName) {
             Log::warning('GameStar77 Buffalo - Could not extract username', [
@@ -181,6 +258,24 @@ class BuffaloGameController extends Controller
             ]);
         }
 
+        // Idempotency Check: Prevent duplicate processing using bet_uid
+        $existingBet = LogBuffaloBet::where('bet_uid', $betUid)->first();
+        if ($existingBet) {
+            Log::info('6TriBet Buffalo - Duplicate bet_uid detected, returning existing result', [
+                'bet_uid' => $betUid,
+                'user' => $user->user_name
+            ]);
+            
+            // Return success with current balance in cents (as per API docs)
+            $user->refresh();
+            $balanceInCents = (int) ($user->balanceFloat * 100);
+            
+            return response()->json([
+                'code' => 1,
+                'msg' => (string) $balanceInCents, // API docs: msg contains "User balance in cents"
+            ]);
+        }
+
         // Get amounts
         $changeAmount = (int) $request->changemoney;
         $betAmount = abs((int) $request->bet);
@@ -189,10 +284,12 @@ class BuffaloGameController extends Controller
         Log::info('6TriBet Buffalo - Processing transaction', [
             'user_name' => $user->user_name,
             'user_id' => $user->id,
+            'bet_uid' => $betUid,
             'change_amount' => $changeAmount,
             'bet_amount' => $betAmount,
             'win_amount' => $winAmount,
-            'game_id' => $request->gameId
+            'game_id' => $gameId,
+            'room_id' => $roomId
         ]);
 
         try {
@@ -206,9 +303,11 @@ class BuffaloGameController extends Controller
                     $changeAmount,
                     TransactionName::GameWin,
                     [
-                        'buffalo_game_id' => $request->gameId,
+                        'buffalo_game_id' => $gameId,
                         'bet_amount' => $betAmount,
                         'win_amount' => $winAmount,
+                        'bet_uid' => $betUid,
+                        'room_id' => $roomId,
                         'provider' => 'buffalo',
                         'transaction_type' => 'game_win'
                     ]
@@ -220,9 +319,11 @@ class BuffaloGameController extends Controller
                     abs($changeAmount),
                     TransactionName::GameLoss,
                     [
-                        'buffalo_game_id' => $request->gameId,
+                        'buffalo_game_id' => $gameId,
                         'bet_amount' => $betAmount,
                         'win_amount' => $winAmount,
+                        'bet_uid' => $betUid,
+                        'room_id' => $roomId,
                         'provider' => 'buffalo',
                         'transaction_type' => 'game_loss'
                     ]
@@ -250,18 +351,22 @@ class BuffaloGameController extends Controller
             Log::info('6TriBet Buffalo - Transaction successful', [
                 'user_id' => $user->id,
                 'user_name' => $user->user_name,
+                'bet_uid' => $betUid,
                 'change_amount' => $changeAmount,
                 'new_balance' => $user->balanceFloat
             ]);
 
             // Log the bet
-            $this->logBuffaloBet($user, $request->all());
+            $this->logBuffaloBet($user, $request->all(), $betUid, $gameId, $roomId);
 
             DB::commit();
 
+            // API docs specify: msg should contain "User balance in cents"
+            $balanceInCents = (int) ($user->balanceFloat * 100);
+
             return response()->json([
                 'code' => 1,
-                'msg' => 'Balance updated successfully',
+                'msg' => (string) $balanceInCents, // User balance in cents as per API docs
             ]);
 
         } catch (\Exception $e) {
@@ -283,14 +388,16 @@ class BuffaloGameController extends Controller
     /**
      * Log Buffalo bet for reporting
      */
-    private function logBuffaloBet(User $user, array $requestData): void
+    private function logBuffaloBet(User $user, array $requestData, string $betUid, ?int $gameId, ?int $roomId): void
     {
         try {
             LogBuffaloBet::create([
                 'member_account' => $user->user_name,
+                'bet_uid' => $betUid,
                 'player_id' => $user->id,
                 'player_agent_id' => $user->agent_id,
-                'buffalo_game_id' => $requestData['gameId'] ?? null,
+                'buffalo_game_id' => $gameId ?? $requestData['gameId'] ?? $requestData['gameld'] ?? null,
+                'room_id' => $roomId ?? $requestData['roomId'] ?? $requestData['roomld'] ?? null,
                 'request_time' => now(),
                 'bet_amount' => abs((int) $requestData['bet']),
                 'win_amount' => (int) $requestData['win'],
@@ -303,13 +410,15 @@ class BuffaloGameController extends Controller
 
             Log::info('6TriBet Buffalo - Bet logged successfully', [
                 'user' => $user->user_name,
-                'game_id' => $requestData['gameId']
+                'bet_uid' => $betUid,
+                'game_id' => $gameId
             ]);
 
         } catch (\Exception $e) {
             Log::error('6TriBet Buffalo - Failed to log bet', [
                 'error' => $e->getMessage(),
-                'user' => $user->user_name
+                'user' => $user->user_name,
+                'bet_uid' => $betUid
             ]);
         }
     }
@@ -352,6 +461,7 @@ class BuffaloGameController extends Controller
         $request->validate([
             'room_id' => 'required|integer|min:1|max:4',
             'lobby_url' => 'nullable|url',
+            'game_id' => 'nullable|integer|in:23,42', // 23 = normal buffalo, 42 = scatter buffalo
         ]);
 
         $user = auth()->user();
@@ -365,6 +475,7 @@ class BuffaloGameController extends Controller
 
         $roomId = $request->room_id;
         $lobbyUrl = $request->lobby_url ?: config('app.url');
+        $gameId = $request->game_id ?? 23; // Default to normal buffalo (23)
 
         // Check if user has sufficient balance for the room
         $availableRooms = BuffaloGameService::getAvailableRooms($user);
@@ -376,16 +487,32 @@ class BuffaloGameController extends Controller
             ]);
         }
 
-        $gameUrl = BuffaloGameService::generateGameUrl($user, $roomId, $lobbyUrl);
+        try {
+            // Call provider's Game Login API to get game URL
+            $gameUrl = BuffaloGameService::generateGameUrl($user, $roomId, $lobbyUrl, $gameId);
 
-        return response()->json([
-            'code' => 1,
-            'msg' => 'Success',
-            'data' => [
-                'game_url' => $gameUrl,
-                'room_info' => $availableRooms[$roomId],
-            ],
-        ]);
+            return response()->json([
+                'code' => 1,
+                'msg' => 'Success',
+                'data' => [
+                    'game_url' => $gameUrl,
+                    'room_info' => $availableRooms[$roomId],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Buffalo generateGameUrl - API Error', [
+                'user_id' => $user->id,
+                'user_name' => $user->user_name,
+                'room_id' => $roomId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'code' => 0,
+                'msg' => 'Failed to generate game URL: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -416,6 +543,15 @@ class BuffaloGameController extends Controller
                 // Generate Buffalo game authentication
                 $auth = BuffaloGameService::generateBuffaloAuth($user);
                 
+                // Log generated auth data for debugging
+                Log::info('6TriBet Buffalo Game Launch - Generated auth data', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->user_name,
+                    'generated_uid' => $auth['uid'],
+                    'generated_token' => substr($auth['token'], 0, 20) . '...' . substr($auth['token'], -10),
+                    'token_length' => strlen($auth['token']),
+                ]);
+                
                 // Get room configuration
                 $roomId = $request->room_id ?? 1; // Default to room 1
                 $availableRooms = BuffaloGameService::getAvailableRooms($user);
@@ -430,26 +566,43 @@ class BuffaloGameController extends Controller
                 
                 $roomConfig = $availableRooms[$roomId];
                 
-                // Generate Buffalo game URL (Production - HTTP as per provider format)
-                $lobbyUrl = 'https://buffalo.meemeegamecenter.com';
-                $gameUrl = BuffaloGameService::generateGameUrl($user, $roomId, $lobbyUrl);
+                // Determine game type: use game_id from request or default to normal buffalo (23)
+                // game_id 23 = normal buffalo, 42 = scatter buffalo
+                $gameId = $request->game_id ?? 23;
                 
-                // Add UID and token to the URL (exact provider format)
-                $gameUrl .= '&uid=' . $auth['uid'] . '&token=' . $auth['token'];
+                // Log request payload for debugging
+                Log::info('6TriBet Buffalo Game Launch - Request payload', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->user_name,
+                    'type_id' => $request->type_id,
+                    'provider_id' => $request->provider_id,
+                    'game_id' => $gameId,
+                    'room_id' => $roomId,
+                    'user_balance' => $user->balanceFloat,
+                ]);
                 
-                Log::info('6TriBet Buffalo Game Launch', [
+                // Generate Buffalo game URL by calling provider's Game Login API
+                $lobbyUrl = config('buffalo.site.url', 'https://maxwinmyanmar.pro');
+                $gameUrl = BuffaloGameService::generateGameUrl($user, $roomId, $lobbyUrl, $gameId);
+                
+                // Note: The game URL is now returned directly from the provider API
+                // No need to manually add UID and token as the API handles authentication
+                
+                Log::info('6TriBet Buffalo Game Launch - Success', [
                     'user_id' => $user->id,
                     'user_name' => $user->user_name,
                     'room_id' => $roomId,
+                    'game_id' => $gameId,
                     'game_url' => $gameUrl,
-                    'auth_data' => $auth
+                    'generated_uid' => $auth['uid'],
+                    'generated_token_preview' => substr($auth['token'], 0, 20) . '...' . substr($auth['token'], -10),
                 ]);
                 
                 return response()->json([
                     'code' => 1,
                     'msg' => 'Game launched successfully',
                     'Url' => $gameUrl, // Compatible with existing frontend
-                    'game_url' => $gameUrl, // HTTP URL (exact provider format)
+                    'game_url' => $gameUrl, // Game URL from provider API
                     'room_info' => $roomConfig,
                     'user_balance' => $user->balanceFloat,
                 ]);
@@ -465,12 +618,13 @@ class BuffaloGameController extends Controller
             Log::error('6TriBet Buffalo Game Launch Error', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
             
             return response()->json([
                 'code' => 0,
-                'msg' => 'Failed to launch game',
+                'msg' => 'Failed to launch game: ' . $e->getMessage(),
             ]);
         }
     }
@@ -490,7 +644,22 @@ public function proxyGame(Request $request)
     }
     
     // Validate it's the expected game server for security
-    if (!str_starts_with($gameUrl, 'http://prime7.wlkfkskakdf.com')) {
+    // Support both old and new game server URLs
+    $allowedDomains = [
+        'http://prime7.wlkfkskakdf.com',
+        'https://prime.next-api.net',
+        'http://prime.next-api.net',
+    ];
+    
+    $isValidUrl = false;
+    foreach ($allowedDomains as $domain) {
+        if (str_starts_with($gameUrl, $domain)) {
+            $isValidUrl = true;
+            break;
+        }
+    }
+    
+    if (!$isValidUrl) {
         return response()->json([
             'error' => 'Invalid URL',
             'message' => 'Only Buffalo game server URLs are allowed'
@@ -521,7 +690,11 @@ public function proxyGame(Request $request)
         
         // If it's HTML, rewrite all URLs to go through proxy
         if (strpos($contentType, 'text/html') !== false) {
-            $gameServerUrl = 'http://prime7.wlkfkskakdf.com';
+            // Detect game server URL from the game URL
+            $gameServerUrl = 'http://prime7.wlkfkskakdf.com'; // Default
+            if (str_contains($gameUrl, 'prime.next-api.net')) {
+                $gameServerUrl = 'https://prime.next-api.net';
+            }
             $proxyBaseUrl = url('/api/buffalo/proxy-resource?url=');
             
             // First, handle all root-relative paths (most important for game assets)
@@ -575,12 +748,16 @@ public function proxyGame(Request $request)
         
         // For CSS files, also rewrite URLs
         if (strpos($contentType, 'text/css') !== false) {
-            $gameServerUrl = 'http://prime7.wlkfkskakdf.com';
+            // Detect game server URL from the game URL
+            $gameServerUrl = 'http://prime7.wlkfkskakdf.com'; // Default
+            if (str_contains($gameUrl, 'prime.next-api.net')) {
+                $gameServerUrl = 'https://prime.next-api.net';
+            }
             $proxyBaseUrl = url('/api/buffalo/proxy-resource?url=');
             
-            // Replace URLs in CSS (url('...'), url("..."), url(...))
+            // Replace URLs in CSS (support both old and new domains)
             $content = preg_replace_callback(
-                '/url\(["\']?(http:\/\/prime7\.wlkfkskakdf\.com[^"\')]*)["\']?\)/i',
+                '/url\(["\']?(https?:\/\/(?:prime7\.wlkfkskakdf\.com|prime\.next-api\.net)[^"\')]*)["\']?\)/i',
                 function($matches) use ($proxyBaseUrl) {
                     return 'url("' . $proxyBaseUrl . urlencode($matches[1]) . '")';
                 },
@@ -630,8 +807,22 @@ public function proxyResource(Request $request)
         return response()->json(['error' => 'No URL provided'], 400);
     }
     
-    // Validate it's the game server
-    if (!str_starts_with($resourceUrl, 'http://prime7.wlkfkskakdf.com')) {
+    // Validate it's the game server (support both old and new URLs)
+    $allowedDomains = [
+        'http://prime7.wlkfkskakdf.com',
+        'https://prime.next-api.net',
+        'http://prime.next-api.net',
+    ];
+    
+    $isValidUrl = false;
+    foreach ($allowedDomains as $domain) {
+        if (str_starts_with($resourceUrl, $domain)) {
+            $isValidUrl = true;
+            break;
+        }
+    }
+    
+    if (!$isValidUrl) {
         return response()->json(['error' => 'Invalid URL'], 403);
     }
     

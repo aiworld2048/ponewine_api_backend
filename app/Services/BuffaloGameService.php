@@ -4,11 +4,15 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Config;
 
 class BuffaloGameService
 {
     /**
      * Site configuration for TriBet
+     * Note: These are now loaded from config/buffalo.php
+     * Kept as constants for backward compatibility
      */
     private const SITE_NAME = 'https://maxwinmyanmar.pro';
     private const SITE_PREFIX = 'mxm'; // az9
@@ -187,7 +191,7 @@ class BuffaloGameService
             "lobbyUrl" => self::SITE_URL,
         ];
 
-        $baseUrl = 'http://prime7.wlkfkskakdf.com/';
+        $baseUrl = 'https://prime.next-api.net/';
         return $baseUrl . '?' . http_build_query($data);
     }
 
@@ -239,21 +243,142 @@ class BuffaloGameService
     //     return $baseUrl . '?' . http_build_query($data);
     // }
 
-    public static function generateGameUrl(User $user, int $roomId = 1, string $lobbyUrl = ''): string
+    /**
+     * Call provider's Game Login API to get game URL
+     * 
+     * @param User $user
+     * @param int $roomId Room ID (1-4)
+     * @param string $lobbyUrl Lobby redirect URL
+     * @param int|null $gameId Game ID (23 for normal buffalo, 42 for scatter buffalo). Default: 23
+     * @return string Game URL from provider
+     * @throws \Exception If API call fails
+     */
+    public static function getGameUrlFromProvider(User $user, int $roomId = 1, string $lobbyUrl = '', ?int $gameId = null): string
     {
-        // Use HTTP exactly as provider examples show
-        $baseUrl = 'http://prime7.wlkfkskakdf.com/';
-        $gameId = 23; // Buffalo game ID from provider examples
+        $uid = self::generateUid($user->user_name);
+        $token = self::generatePersistentToken($user->user_name);
         
-        // Use provided lobby URL or default to production site
-        $finalLobbyUrl = $lobbyUrl ?: 'https://buffalo.meemeegamecenter.com';
+        // Get configuration
+        $apiUrl = Config::get('buffalo.api.url', 'https://api-ms3.african-buffalo.club/api/game-login');
+        $domain = Config::get('buffalo.domain', 'prime.com');
+        $timeout = Config::get('buffalo.timeout', 30);
+        $gameServerUrl = Config::get('buffalo.game_server_url', 'https://prime.next-api.net');
         
-        // Generate the base URL without auth (auth will be added by controller)
-        $gameUrl = $baseUrl . '?gameId=' . $gameId . 
-                   '&roomId=' . $roomId . 
-                   '&lobbyUrl=' . urlencode($finalLobbyUrl);
+        // Use provided gameId or default to normal buffalo (23)
+        if ($gameId === null) {
+            $gameId = Config::get('buffalo.game_id', 23);
+        }
         
-        return $gameUrl;
+        // Provider requires lobbyUrl to be the game server URL (https://prime.next-api.net)
+        // This is the base URL where the game will be loaded
+        $providerLobbyUrl = $gameServerUrl;
+        
+        // Get client's website URL (for redirect when player exits)
+        // Use provided lobbyUrl parameter or default from config
+        $clientWebsiteUrl = $lobbyUrl ?: Config::get('buffalo.site.url', self::SITE_URL);
+        
+        // Prepare request payload (roomId must be string per provider API)
+        $payload = [
+            'uid' => $uid,
+            'token' => $token,
+            'gameId' => $gameId,
+            'roomId' => (string) $roomId,  // Provider requires string, not integer
+            'lobbyUrl' => $providerLobbyUrl,  // Provider's game server URL (https://prime.next-api.net)
+            'domain' => $domain,  // Required by provider
+        ];
+        
+        // Note: The provider API will return a URL like:
+        // https://prime.next-api.net/?gameId=42&roomId=1&uid=...&token=...&lobbyUrl=https%3A%2F%2Fbuffaloking788.com
+        // Where lobbyUrl query parameter contains the client's website URL for redirect
+        
+        Log::info('Buffalo Game Login API - Request', [
+            'api_url' => $apiUrl,
+            'user' => $user->user_name,
+            'room_id' => $roomId,
+            'game_id' => $gameId,
+            'payload' => array_merge($payload, ['token' => substr($token, 0, 10) . '...']), // Log partial token
+        ]);
+        
+        try {
+            $response = Http::timeout($timeout)
+                ->withOptions(['verify' => false]) // Disable SSL verification if needed
+                ->asJson()
+                ->post($apiUrl, $payload);
+            
+            if (!$response->successful()) {
+                $errorBody = $response->body();
+                Log::error('Buffalo Game Login API - Failed', [
+                    'status' => $response->status(),
+                    'response' => $errorBody,
+                    'user' => $user->user_name,
+                ]);
+                
+                throw new \Exception("Game Login API failed: HTTP {$response->status()} - {$errorBody}");
+            }
+            
+            $responseData = $response->json();
+            
+            if (!isset($responseData['url'])) {
+                Log::error('Buffalo Game Login API - Invalid response format', [
+                    'response' => $responseData,
+                    'user' => $user->user_name,
+                ]);
+                
+                throw new \Exception("Game Login API returned invalid response: missing 'url' field");
+            }
+            
+            $gameUrl = $responseData['url'];
+            
+            // Verify the returned URL format matches expected pattern
+            // Expected: https://prime.next-api.net/?gameId=42&roomId=1&uid=...&token=...&lobbyUrl=https%3A%2F%2Fbuffaloking788.com
+            if (!str_contains($gameUrl, 'prime.next-api.net')) {
+                Log::warning('Buffalo Game Login API - Unexpected URL format', [
+                    'user' => $user->user_name,
+                    'game_url' => $gameUrl,
+                ]);
+            }
+            
+            Log::info('Buffalo Game Login API - Success', [
+                'user' => $user->user_name,
+                'room_id' => $roomId,
+                'game_id' => $gameId,
+                'game_url' => $gameUrl,
+            ]);
+            
+            return $gameUrl;
+            
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Buffalo Game Login API - Connection error', [
+                'error' => $e->getMessage(),
+                'user' => $user->user_name,
+            ]);
+            
+            throw new \Exception("Failed to connect to Game Login API: " . $e->getMessage());
+            
+        } catch (\Exception $e) {
+            Log::error('Buffalo Game Login API - Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user' => $user->user_name,
+            ]);
+            
+            throw $e;
+        }
+    }
+
+    /**
+     * Generate Buffalo game URL with lobby URL
+     * This method now calls the provider's Game Login API
+     * 
+     * @param User $user
+     * @param int $roomId Room ID (1-4)
+     * @param string $lobbyUrl Lobby redirect URL
+     * @param int|null $gameId Game ID (23 for normal, 42 for scatter). Default: 23
+     * @return string Game URL from provider
+     */
+    public static function generateGameUrl(User $user, int $roomId = 1, string $lobbyUrl = '', ?int $gameId = null): string
+    {
+        return self::getGameUrlFromProvider($user, $roomId, $lobbyUrl, $gameId);
     }
 
     
