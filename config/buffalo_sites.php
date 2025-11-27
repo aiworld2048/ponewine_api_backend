@@ -37,6 +37,27 @@ return [
             'enabled' => true,
         ],
 
+        // Site: MaxWin (mxm prefix used by provider default config)
+        'mxm' => [
+            'name' => 'MaxWin Myanmar',
+            'prefix' => 'mxm',
+            'site_url' => env('SITE_MXM_URL', 'https://maxwinmyanmar.pro'),
+            'api_url' => env('SITE_MXM_API_URL', 'https://maxwinmyanmar.pro/api'),
+            'lobby_url' => env('SITE_MXM_LOBBY_URL', 'https://maxwinmyanmar.pro'),
+            'provider_api_url' => env('SITE_MXM_PROVIDER_API_URL', $defaultProviderApiUrl),
+            'domain' => env('SITE_MXM_DOMAIN', $defaultDomain),
+            'game_server_url' => env('SITE_MXM_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_id' => env('SITE_MXM_GAME_ID', $defaultGameId),
+            'api_timeout' => env('SITE_MXM_API_TIMEOUT', $defaultApiTimeout),
+            'verify_ssl' => env('SITE_MXM_VERIFY_SSL', false),
+            'is_local' => true,
+            'api_endpoints' => [
+                'get_balance' => '/buffalo/get-user-balance',
+                'change_balance' => '/buffalo/change-balance',
+            ],
+            'enabled' => true,
+        ],
+
         // Site 2: Golden City Casino
         'gcc' => [
             'name' => 'Golden City Casino',
