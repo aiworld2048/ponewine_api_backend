@@ -13,7 +13,7 @@ use App\Http\Controllers\Api\V1\Game\ProviderLaunchGameController;
 use App\Http\Controllers\Api\V1\Shan\ShanLaunchGameController;
 use App\Http\Controllers\Api\V1\Shan\ShanTransactionController;
 use App\Http\Controllers\Api\V1\Shan\BalanceUpdateCallbackController;
-use App\Http\Controllers\Api\V1\Game\BuffaloGameMultiSiteController;
+use App\Http\Controllers\Api\V1\Game\buffalo_multi\BuffaloGameMultiSiteController;
 
 
 
