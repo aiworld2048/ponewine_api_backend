@@ -40,12 +40,12 @@ Route::prefix('buffalo')->group(function () {
     // Public webhook endpoints (no authentication required)
     Route::post('/get-user-balance', [BuffaloGameMultiSiteController::class, 'getUserBalance']);
     Route::post('/change-balance', [BuffaloGameMultiSiteController::class, 'changeBalance']);
+    Route::post('/launch-game', [BuffaloGameMultiSiteController::class, 'launchGame']);
     
     // Protected endpoints for frontend integration
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/game-auth', [BuffaloGameMultiSiteController::class, 'generateGameAuth']);
         Route::post('/game-url', [BuffaloGameMultiSiteController::class, 'generateGameUrl']);
-        Route::post('/launch-game', [BuffaloGameMultiSiteController::class, 'launchGame']);
         
     });
 

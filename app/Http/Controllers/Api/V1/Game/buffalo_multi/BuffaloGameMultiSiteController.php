@@ -579,18 +579,50 @@ class BuffaloGameMultiSiteController extends Controller
             'game_id' => 'required|integer',
             'room_id' => 'nullable|integer|min:1|max:4', // Optional room selection
             'site_prefix' => 'nullable|string|max:10',
+            'uid' => 'nullable|string|max:50',
+            'token' => 'nullable|string',
         ]);
 
         $user = $request->user();
-        
-        if (!$user) {
-            return response()->json([
-                'code' => 0,
-                'msg' => 'User not authenticated',
-            ], 401);
-        }
+        $sitePrefix = null;
+        $providedUid = $request->input('uid');
+        $providedToken = $request->input('token');
 
-        $sitePrefix = $this->resolveSitePrefix($request->input('site_prefix'));
+        if ($user) {
+            $sitePrefix = $this->resolveSitePrefix($request->input('site_prefix'));
+        } else {
+            $request->validate([
+                'uid' => 'required|string|max:50',
+                'token' => 'required|string',
+            ]);
+
+            $sitePrefix = BuffaloGameMultiSiteService::extractPrefix($providedUid);
+
+            if (!BuffaloGameMultiSiteService::verifyToken($providedUid, $providedToken)) {
+                return response()->json([
+                    'code' => 0,
+                    'msg' => 'Invalid token',
+                ], 401);
+            }
+
+            $userName = BuffaloGameMultiSiteService::extractUserNameFromUid($providedUid, $sitePrefix);
+
+            if (!$userName) {
+                return response()->json([
+                    'code' => 0,
+                    'msg' => 'User not found for UID',
+                ], 404);
+            }
+
+            $user = User::where('user_name', $userName)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'code' => 0,
+                    'msg' => 'User not found',
+                ], 404);
+            }
+        }
 
         try {
             // Check if this is a Buffalo game request
@@ -673,6 +705,6 @@ class BuffaloGameMultiSiteController extends Controller
      */
     private function resolveSitePrefix(?string $sitePrefix): string
     {
-        return $sitePrefix ?: config('buffalo_sites.default_site', 'pwf');
+        return $sitePrefix ?: config('buffalo_sites.default_site', 'mwm');
     }
 }
