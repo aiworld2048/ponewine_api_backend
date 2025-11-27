@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Game\ProviderLaunchGameController;
 use App\Http\Controllers\Api\V1\Shan\ShanLaunchGameController;
 use App\Http\Controllers\Api\V1\Shan\ShanTransactionController;
 use App\Http\Controllers\Api\V1\Shan\BalanceUpdateCallbackController;
+use App\Http\Controllers\Api\V1\Game\BuffaloGameMultiSiteController;
 
 
 
@@ -37,15 +38,15 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // Buffalo Game API routes
 Route::prefix('buffalo')->group(function () {
     // Public webhook endpoints (no authentication required)
-    Route::post('/get-user-balance', [BuffaloGameController::class, 'getUserBalance']);
-    Route::post('/change-balance', [BuffaloGameController::class, 'changeBalance']);
+    Route::post('/get-user-balance', [BuffaloGameMultiSiteController::class, 'getUserBalance']);
+    Route::post('/change-balance', [BuffaloGameMultiSiteController::class, 'changeBalance']);
     
     // Protected endpoints for frontend integration
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/game-auth', [BuffaloGameController::class, 'generateGameAuth']);
-        Route::post('/game-url', [BuffaloGameController::class, 'generateGameUrl']);
-        Route::post('/launch-game', [BuffaloGameController::class, 'launchGame']);
-        // Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
+        Route::get('/game-auth', [BuffaloGameMultiSiteController::class, 'generateGameAuth']);
+        Route::post('/game-url', [BuffaloGameMultiSiteController::class, 'generateGameUrl']);
+        Route::post('/launch-game', [BuffaloGameMultiSiteController::class, 'launchGame']);
+        
     });
 
     //  Route::get('/proxy-game', [BuffaloGameController::class, 'proxyGame']);
