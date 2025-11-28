@@ -3,6 +3,8 @@
 $defaultProviderApiUrl = env('BUFFALO_API_URL', 'https://api-ms3.african-buffalo.club/api/game-login');
 $defaultDomain = env('BUFFALO_DOMAIN', 'prime.com');
 $defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net');
+$TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
+
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
 
@@ -85,10 +87,10 @@ return [
             'prefix' => 'ttt',
             'site_url' => env('SITE_3_URL', 'https://ag.tttgamingmm.pro'),
             'api_url' => env('SITE_3_API_URL', 'https://ag.tttgamingmm.pro/api'),
-            'lobby_url' => env('SITE_3_LOBBY_URL', 'https://ag.tttgamingmm.pro'),
+            'lobby_url' => env('SITE_3_LOBBY_URL', $TTT_GameServerUrl),
             'provider_api_url' => env('SITE_3_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_3_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_3_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_server_url' => env('SITE_3_GAME_SERVER_URL', $TTT_GameServerUrl),
             'game_id' => env('SITE_3_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_3_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_3_VERIFY_SSL', false),
