@@ -4,6 +4,7 @@ $defaultProviderApiUrl = env('BUFFALO_API_URL', 'https://api-ms3.african-buffalo
 $defaultDomain = env('BUFFALO_DOMAIN', 'prime.com');
 $defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net');
 $TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
+$OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
 
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
@@ -108,10 +109,10 @@ return [
             'prefix' => 'oxb',
             'site_url' => env('SITE_4_URL', 'https://ag.onexbetmm.site'),
             'api_url' => env('SITE_4_API_URL', 'https://ag.onexbetmm.site/api'),
-            'lobby_url' => env('SITE_4_LOBBY_URL', 'https://ag.onexbetmm.site'),
+            'lobby_url' => env('SITE_4_LOBBY_URL', $OneXBet_GameServerUrl),
             'provider_api_url' => env('SITE_4_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_4_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_4_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_server_url' => env('SITE_4_GAME_SERVER_URL', $OneXBet_GameServerUrl),
             'game_id' => env('SITE_4_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_4_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_4_VERIFY_SSL', false),
