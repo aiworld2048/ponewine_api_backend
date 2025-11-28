@@ -5,6 +5,7 @@ $defaultDomain = env('BUFFALO_DOMAIN', 'prime.com');
 $defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net');
 $TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
 $OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
+$Burmese888_GameServerUrl = env('Burmese888_GAME_SERVER_URL', 'https://m.burmar888.site');
 
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
@@ -285,10 +286,10 @@ return [
             'prefix' => 'bm8',
             'site_url' => env('SITE_12_URL', 'https://ag.burmar888.online'),
             'api_url' => env('SITE_12_API_URL', 'https://ag.burmar888.online/api'),
-            'lobby_url' => env('SITE_12_LOBBY_URL', 'https://ag.burmar888.online'),
+            'lobby_url' => env('SITE_12_LOBBY_URL', $Burmese888_GameServerUrl),
             'provider_api_url' => env('SITE_12_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_12_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_12_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_server_url' => env('SITE_12_GAME_SERVER_URL', $Burmese888_GameServerUrl),
             'game_id' => env('SITE_12_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_12_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_12_VERIFY_SSL', false),
