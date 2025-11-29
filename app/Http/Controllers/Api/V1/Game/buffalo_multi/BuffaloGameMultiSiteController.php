@@ -441,6 +441,67 @@ class BuffaloGameMultiSiteController extends Controller
     }
 
     /**
+     * Forward launch game request to external site
+     */
+    private function forwardLaunchGameToExternalSite(Request $request, string $prefix)
+    {
+        $externalApiUrl = BuffaloGameMultiSiteService::getExternalApiUrl($prefix, 'launch_game');
+
+        if (!$externalApiUrl) {
+            Log::error('Buffalo launchGame - External API URL not configured', [
+                'prefix' => $prefix,
+            ]);
+
+            return response()->json([
+                'code' => 0,
+                'msg' => 'Site configuration error',
+            ]);
+        }
+
+        Log::info('Buffalo launchGame - Forwarding to external site', [
+            'prefix' => $prefix,
+            'external_url' => $externalApiUrl,
+            'request_data' => $request->all(),
+        ]);
+
+        try {
+            $payload = array_merge($request->all(), ['site_prefix' => $prefix]);
+            $response = Http::timeout(10)->post($externalApiUrl, $payload);
+
+            if ($response->successful()) {
+                Log::info('Buffalo launchGame - External API success', [
+                    'prefix' => $prefix,
+                    'response' => $response->json(),
+                ]);
+
+                return response()->json($response->json(), 200);
+            }
+
+            Log::error('Buffalo launchGame - External API failed', [
+                'prefix' => $prefix,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+
+            return response()->json([
+                'code' => 0,
+                'msg' => 'External API error',
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('Buffalo launchGame - External API exception', [
+                'prefix' => $prefix,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'code' => 0,
+                'msg' => 'Connection error',
+            ], 500);
+        }
+    }
+
+    /**
      * Generate Buffalo game authentication data for frontend
      */
     public function generateGameAuth(Request $request)
@@ -597,7 +658,22 @@ class BuffaloGameMultiSiteController extends Controller
             ]);
 
             $sitePrefix = BuffaloGameMultiSiteService::extractPrefix($providedUid);
+        }
 
+        $siteConfig = BuffaloGameMultiSiteService::getSiteConfig($sitePrefix);
+
+        if (!$siteConfig || !($siteConfig['enabled'] ?? false)) {
+            return response()->json([
+                'code' => 0,
+                'msg' => 'Invalid site prefix',
+            ], 422);
+        }
+
+        if (!($siteConfig['is_local'] ?? false)) {
+            return $this->forwardLaunchGameToExternalSite($request, $sitePrefix);
+        }
+
+        if (!$user) {
             if (!BuffaloGameMultiSiteService::verifyToken($providedUid, $providedToken)) {
                 return response()->json([
                     'code' => 0,
@@ -645,15 +721,6 @@ class BuffaloGameMultiSiteController extends Controller
                 $roomConfig = $availableRooms[$roomId];
                 
                 // Generate Buffalo game URL (Production - HTTP as per provider format)
-                $siteConfig = BuffaloGameMultiSiteService::getSiteConfig($sitePrefix);
-
-                if (!$siteConfig) {
-                    return response()->json([
-                        'code' => 0,
-                        'msg' => 'Invalid site prefix',
-                    ], 422);
-                }
-
                 $lobbyUrl = $siteConfig['lobby_url'] ?? config('app.url');
                 $gameUrl = BuffaloGameMultiSiteService::generateGameUrl($user, $roomId, $sitePrefix, $lobbyUrl);
                 

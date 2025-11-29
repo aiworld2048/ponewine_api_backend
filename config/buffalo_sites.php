@@ -79,6 +79,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -100,6 +101,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -121,6 +123,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -142,6 +145,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -164,6 +168,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -185,6 +190,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => false,
         ],
@@ -208,6 +214,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -230,6 +237,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => false, // Disabled by default
         ],
@@ -275,6 +283,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
@@ -297,6 +306,7 @@ return [
             'api_endpoints' => [
                 'get_balance' => '/buffalo/get-user-balance',
                 'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
             ],
             'enabled' => true,
         ],
