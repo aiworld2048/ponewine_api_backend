@@ -7,6 +7,7 @@ $TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
 $OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
 $Burmese888_GameServerUrl = env('Burmese888_GAME_SERVER_URL', 'https://m.burmar888.site');
 $Shanyoma_GameServerUrl = env('Shanyoma_GAME_SERVER_URL', 'https://m.shanyoma789.com');
+$AZM999_GameServerUrl = env('AZM999_GAME_SERVER_URL', 'https://online.azm999.com');
 
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
@@ -202,15 +203,37 @@ return [
 
         // azm990 
 
+        // 'az9' => [
+        //     'name' => 'Azm999',
+        //     'prefix' => 'az9',
+        //     'site_url' => env('SITE_8_URL', 'https://master.azm999.com'),
+        //     'api_url' => env('SITE_8_API_URL', 'https://master.azm999.com/api'),
+        //     'lobby_url' => env('SITE_8_LOBBY_URL', 'https://master.azm999.com'),
+        //     'provider_api_url' => env('SITE_8_PROVIDER_API_URL', $defaultProviderApiUrl),
+        //     'domain' => env('SITE_8_DOMAIN', $defaultDomain),
+        //     'game_server_url' => env('SITE_8_GAME_SERVER_URL', $defaultGameServerUrl),
+        //     'game_id' => env('SITE_8_GAME_ID', $defaultGameId),
+        //     'api_timeout' => env('SITE_8_API_TIMEOUT', $defaultApiTimeout),
+        //     'verify_ssl' => env('SITE_8_VERIFY_SSL', false),
+        //     'is_local' => false, // Forward to external API
+        //     'api_endpoints' => [
+        //         'get_balance' => '/buffalo/get-user-balance',
+        //         'change_balance' => '/buffalo/change-balance',
+        //         'launch_game' => '/buffalo/launch-game',
+        //     ],
+        //     'enabled' => true,
+        // ],
+
+
         'az9' => [
-            'name' => 'Azm999',
+            'name' => 'AZM999',
             'prefix' => 'az9',
             'site_url' => env('SITE_8_URL', 'https://master.azm999.com'),
             'api_url' => env('SITE_8_API_URL', 'https://master.azm999.com/api'),
-            'lobby_url' => env('SITE_8_LOBBY_URL', 'https://master.azm999.com'),
+            'lobby_url' => env('SITE_8_LOBBY_URL', $AZM999_GameServerUrl),
             'provider_api_url' => env('SITE_8_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_8_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServerUrl),
             'game_id' => env('SITE_8_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_8_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_8_VERIFY_SSL', false),
