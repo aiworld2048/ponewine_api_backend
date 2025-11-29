@@ -447,6 +447,107 @@ class BuffaloGameMultiSiteService
     }
 
     /**
+     * Generate Buffalo game URL for a site using provided UID/token (external partners)
+     */
+    public static function getGameUrlWithCredentials(
+        string $uid,
+        string $token,
+        string $sitePrefix,
+        int $roomId = 1,
+        string $clientLobbyUrl = '',
+        ?int $gameId = null
+    ): string {
+        $sitePrefix = self::resolveSitePrefix($sitePrefix);
+        $siteConfig = self::getSiteConfig($sitePrefix);
+
+        if (!$siteConfig) {
+            throw new \Exception("Invalid site prefix: {$sitePrefix}");
+        }
+
+        $provider = self::resolveProviderConfig($siteConfig);
+        $gameId = $gameId ?? $provider['game_id'];
+
+        $payload = [
+            'uid' => $uid,
+            'token' => $token,
+            'gameId' => $gameId,
+            'roomId' => (string) $roomId,
+            'lobbyUrl' => $provider['game_server_url'],
+            'domain' => $provider['domain'],
+        ];
+
+        Log::info('Buffalo Multi-Site: External credential game login', [
+            'site' => $siteConfig['name'] ?? $sitePrefix,
+            'prefix' => $sitePrefix,
+            'room_id' => $roomId,
+            'game_id' => $gameId,
+            'client_lobby_url' => $clientLobbyUrl ?: ($siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null),
+        ]);
+
+        $httpOptions = ['verify' => $provider['verify_ssl']];
+
+        try {
+            $response = Http::timeout($provider['timeout'])
+                ->withOptions($httpOptions)
+                ->asJson()
+                ->post($provider['api_url'], $payload);
+
+            if (!$response->successful()) {
+                Log::error('Buffalo Multi-Site: External credential login failed', [
+                    'site' => $siteConfig['name'] ?? $sitePrefix,
+                    'prefix' => $sitePrefix,
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+
+                throw new \Exception("Game Login API failed ({$response->status()}) for site {$sitePrefix}");
+            }
+
+            $responseData = $response->json();
+
+            if (!isset($responseData['url'])) {
+                Log::error('Buffalo Multi-Site: External credential login invalid response', [
+                    'site' => $siteConfig['name'] ?? $sitePrefix,
+                    'prefix' => $sitePrefix,
+                    'response' => $responseData,
+                ]);
+
+                throw new \Exception("Game Login API returned invalid response for site {$sitePrefix}");
+            }
+
+            $gameUrl = $responseData['url'];
+
+            Log::info('Buffalo Multi-Site: External credential game login success', [
+                'site' => $siteConfig['name'] ?? $sitePrefix,
+                'prefix' => $sitePrefix,
+                'room_id' => $roomId,
+                'game_id' => $gameId,
+                'game_url' => $gameUrl,
+            ]);
+
+            return $gameUrl;
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Buffalo Multi-Site: External credential login connection error', [
+                'site' => $siteConfig['name'] ?? $sitePrefix,
+                'prefix' => $sitePrefix,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new \Exception("Failed to reach Game Login API for site {$sitePrefix}: {$e->getMessage()}");
+
+        } catch (\Exception $e) {
+            Log::error('Buffalo Multi-Site: External credential login exception', [
+                'site' => $siteConfig['name'] ?? $sitePrefix,
+                'prefix' => $sitePrefix,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
      * Generate Buffalo game URL (provider API) for site
      */
     public static function generateGameUrl(

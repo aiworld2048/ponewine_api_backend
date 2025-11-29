@@ -669,8 +669,47 @@ class BuffaloGameMultiSiteController extends Controller
             ], 422);
         }
 
-        if (!($siteConfig['is_local'] ?? false)) {
-            return $this->forwardLaunchGameToExternalSite($request, $sitePrefix);
+        $isLocalSite = $siteConfig['is_local'] ?? false;
+
+        if (!$isLocalSite) {
+            $request->validate([
+                'uid' => 'required|string|max:50',
+                'token' => 'required|string',
+            ]);
+
+            $roomId = $request->room_id ?? 1;
+
+            try {
+                $gameUrl = BuffaloGameMultiSiteService::getGameUrlWithCredentials(
+                    $providedUid,
+                    $providedToken,
+                    $sitePrefix,
+                    $roomId,
+                    $siteConfig['lobby_url'] ?? config('app.url'),
+                    $request->game_id
+                );
+
+                return response()->json([
+                    'code' => 1,
+                    'msg' => 'Game launched successfully',
+                    'Url' => $gameUrl,
+                    'game_url' => $gameUrl,
+                    'room_id' => $roomId,
+                    'site_prefix' => $sitePrefix,
+                ]);
+
+            } catch (\Exception $e) {
+                Log::error('Buffalo Game Launch External Error', [
+                    'site_prefix' => $sitePrefix,
+                    'error' => $e->getMessage(),
+                    'request_data' => $request->all(),
+                ]);
+
+                return response()->json([
+                    'code' => 0,
+                    'msg' => 'Failed to launch game: ' . $e->getMessage(),
+                ]);
+            }
         }
 
         if (!$user) {
