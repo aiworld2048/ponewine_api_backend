@@ -6,6 +6,7 @@ $defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.n
 $TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
 $OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
 $Burmese888_GameServerUrl = env('Burmese888_GAME_SERVER_URL', 'https://m.burmar888.site');
+$Shanyoma_GameServerUrl = env('Shanyoma_GAME_SERVER_URL', 'https://m.shanyoma789.com');
 
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
@@ -23,21 +24,24 @@ return [
 
     'sites' => [
         // Site 1: PoneWine (Current Site)
-        'pwf' => [
-            'name' => 'PoneWine',
-            'prefix' => 'pwf',
-            'site_url' => env('SITE_1_URL', 'https://ag.ponewine20x.xyz'),
-            'api_url' => env('SITE_1_API_URL', 'https://ag.ponewine20x.xyz/api'),
-            // 'lobby_url' => env('SITE_1_LOBBY_URL', 'https://africanbuffalo.vip'),
-            'lobby_url' => env('SITE_1_LOBBY_URL', 'https://m.ponewine20x.xyz'),
-            'is_local' => true,  // Handle locally (this site)
-            'database' => 'default', // Use default database connection
+        'sym' => [
+            'name' => 'Shanyoma',
+            'prefix' => 'sym',
+            'site_url' => env('SITE_1_URL', 'https://ag.shanyoma789.com'),
+            'api_url' => env('SITE_1_API_URL', 'https://ag.shanyoma789.com/api'),
+            'lobby_url' => env('SITE_1_LOBBY_URL', $Shanyoma_GameServerUrl),
             'provider_api_url' => env('SITE_1_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_1_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_1_GAME_SERVER_URL', $defaultGameServerUrl),
+            'game_server_url' => env('SITE_1_GAME_SERVER_URL', $Shanyoma_GameServerUrl),
             'game_id' => env('SITE_1_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_1_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_1_VERIFY_SSL', false),
+            'is_local' => false, // Forward to external API
+            'api_endpoints' => [
+                'get_balance' => '/buffalo/get-user-balance',
+                'change_balance' => '/buffalo/change-balance',
+                'launch_game' => '/buffalo/launch-game',
+            ],
             'enabled' => true,
         ],
 
