@@ -481,12 +481,17 @@ class BuffaloGameMultiSiteService
 
         $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
 
+        // omit lobbyUrl if it is empty
+        if (empty($lobbyUrl)) {
+            $lobbyUrl = null;
+        }
+
         $payload = [
             'uid' => $uid,
             'token' => $token,
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $lobbyUrl,
+            'lobbyUrl' => $lobbyUrl ?? null,
             'domain' => $provider['domain'],
         ];
 
