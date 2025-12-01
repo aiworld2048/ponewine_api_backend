@@ -3,12 +3,12 @@
 $defaultProviderApiUrl = env('BUFFALO_API_URL', 'https://api-ms3.african-buffalo.club/api/game-login');
 $defaultDomain = env('BUFFALO_DOMAIN', 'prime.com');
 $defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net');
-$TTT_Lobby_Url = env('TTT_Lobby_Url', 'https://tttgamingmm.pro');
-$OneXBet_Lobby_Url = env('OneXBet_Lobby_Url', 'https://m.onexbetmm.site');
-$Burmese888_Lobby_Url = env('Burmese888_Lobby_Url', 'https://m.burmar888.site');
-$Shanyoma_Lobby_Url = env('Shanyoma_Lobby_Url', 'https://m.shanyoma789.com');
-$AZM999_Lobby_Url = env('AZM999_Lobby_Url', '', null); // https://online.azm999.com
-$AZM999_GameServer_Url = env('AZM999_GameServer_Url', 'https://prime.next-api.net');
+$TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
+$OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
+$Burmese888_GameServerUrl = env('Burmese888_GAME_SERVER_URL', 'https://m.burmar888.site');
+$Shanyoma_GameServerUrl = env('Shanyoma_GAME_SERVER_URL', 'https://m.shanyoma789.com');
+$AZM999_GameServerUrl = env('AZM999_GAME_SERVER_URL', 'https://prime.next-api.net'); // https://online.azm999.com
+
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
 
@@ -30,10 +30,10 @@ return [
             'prefix' => 'sym',
             'site_url' => env('SITE_1_URL', 'https://ag.shanyoma789.com'),
             'api_url' => env('SITE_1_API_URL', 'https://ag.shanyoma789.com/api'),
-            'lobby_url' => env('SITE_1_LOBBY_URL', $Shanyoma_Lobby_Url),
+            'lobby_url' => env('SITE_1_LOBBY_URL', $Shanyoma_GameServerUrl),
             'provider_api_url' => env('SITE_1_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_1_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_1_GAME_SERVER_URL', $Shanyoma_Lobby_Url),
+            'game_server_url' => env('SITE_1_GAME_SERVER_URL', $Shanyoma_GameServerUrl),
             'game_id' => env('SITE_1_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_1_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_1_VERIFY_SSL', false),
@@ -95,10 +95,10 @@ return [
             'prefix' => 'ttt',
             'site_url' => env('SITE_3_URL', 'https://ag.tttgamingmm.pro'),
             'api_url' => env('SITE_3_API_URL', 'https://ag.tttgamingmm.pro/api'),
-            'lobby_url' => env('SITE_3_LOBBY_URL', $TTT_Lobby_Url),
+            'lobby_url' => env('SITE_3_LOBBY_URL', $TTT_GameServerUrl),
             'provider_api_url' => env('SITE_3_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_3_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_3_GAME_SERVER_URL', $TTT_Lobby_Url),
+            'game_server_url' => env('SITE_3_GAME_SERVER_URL', $TTT_GameServerUrl),
             'game_id' => env('SITE_3_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_3_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_3_VERIFY_SSL', false),
@@ -117,10 +117,10 @@ return [
             'prefix' => 'oxb',
             'site_url' => env('SITE_4_URL', 'https://ag.onexbetmm.site'),
             'api_url' => env('SITE_4_API_URL', 'https://ag.onexbetmm.site/api'),
-            'lobby_url' => env('SITE_4_LOBBY_URL', $OneXBet_Lobby_Url),
+            'lobby_url' => env('SITE_4_LOBBY_URL', $OneXBet_GameServerUrl),
             'provider_api_url' => env('SITE_4_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_4_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_4_GAME_SERVER_URL', $OneXBet_Lobby_Url),
+            'game_server_url' => env('SITE_4_GAME_SERVER_URL', $OneXBet_GameServerUrl),
             'game_id' => env('SITE_4_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_4_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_4_VERIFY_SSL', false),
@@ -230,10 +230,10 @@ return [
             'prefix' => 'az9',
             'site_url' => env('SITE_8_URL', 'https://master.azm999.com'),
             'api_url' => env('SITE_8_API_URL', 'https://master.azm999.com/api'),
-            'lobby_url' => env('SITE_8_LOBBY_URL', $AZM999_Lobby_Url),
+            'lobby_url' => env('SITE_8_LOBBY_URL', $AZM999_GameServerUrl),
             'provider_api_url' => env('SITE_8_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_8_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServer_Url),
+            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServerUrl),
             'game_id' => env('SITE_8_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_8_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_8_VERIFY_SSL', false),
@@ -322,10 +322,10 @@ return [
             'prefix' => 'bm8',
             'site_url' => env('SITE_12_URL', 'https://ag.burmar888.online'),
             'api_url' => env('SITE_12_API_URL', 'https://ag.burmar888.online/api'),
-            'lobby_url' => env('SITE_12_LOBBY_URL', $Burmese888_Lobby_Url),
+            'lobby_url' => env('SITE_12_LOBBY_URL', $Burmese888_GameServerUrl),
             'provider_api_url' => env('SITE_12_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_12_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_12_GAME_SERVER_URL', $Burmese888_Lobby_Url),
+            'game_server_url' => env('SITE_12_GAME_SERVER_URL', $Burmese888_GameServerUrl),
             'game_id' => env('SITE_12_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_12_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_12_VERIFY_SSL', false),
