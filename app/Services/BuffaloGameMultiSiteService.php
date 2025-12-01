@@ -332,17 +332,10 @@ class BuffaloGameMultiSiteService
      */
     private static function resolveProviderConfig(array $siteConfig): array
     {
-        $defaultGameServer = Config::get('buffalo.game_server_url', 'https://prime.next-api.net');
-        // $defaultGameServer = '';
-         $gameServerUrl = $siteConfig['game_server_url'] ?? $defaultGameServer;
-        // if (!$gameServerUrl) {
-        //     $gameServerUrl = $defaultGameServer;
-        // }
-
         return [
             'api_url' => $siteConfig['provider_api_url'] ?? Config::get('buffalo.api.url', 'https://api-ms3.african-buffalo.club/api/game-login'),
             'domain' => $siteConfig['domain'] ?? Config::get('buffalo.domain', 'prime.com'),
-           'game_server_url' => $gameServerUrl,
+            'game_server_url' => $siteConfig['game_server_url'] ?? Config::get('buffalo.game_server_url', 'https://prime.next-api.net'),
             'timeout' => $siteConfig['api_timeout'] ?? Config::get('buffalo.timeout', 30),
             'game_id' => $siteConfig['game_id'] ?? Config::get('buffalo.game_id', 23),
             'verify_ssl' => $siteConfig['verify_ssl'] ?? false,
@@ -370,23 +363,12 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
-       // $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
-       $lobbyUrl = null;
-
-        //$lobbyUrl = $clientLobbyUrl ?: $siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null;
-       if(empty($lobbyUrl)) {
-        $lobbyUrl = null;
-       }
-       else {
-        $lobbyUrl = $clientLobbyUrl;
-       }
-       
         $payload = [
             'uid' => $auth['uid'],
             'token' => $auth['token'],
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $lobbyUrl, 
+            'lobbyUrl' => $provider['game_server_url'],
             'domain' => $provider['domain'],
         ];
 
@@ -395,7 +377,7 @@ class BuffaloGameMultiSiteService
             'prefix' => $sitePrefix,
             'room_id' => $roomId,
             'game_id' => $gameId,
-            'client_lobby_url' => $lobbyUrl,
+            'client_lobby_url' => $clientLobbyUrl ?: ($siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null),
             'payload' => array_merge($payload, [
                 'token' => substr($payload['token'], 0, 8) . '...' . substr($payload['token'], -6),
             ]),
@@ -485,30 +467,12 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
-        //$lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
-        $lobbyUrl = $clientLobbyUrl;
-
-        Log::info('Buffalo Multi-Site: External credential game login', [
-            'site' => $siteConfig['name'] ?? $sitePrefix,
-            'prefix' => $sitePrefix,
-            'room_id' => $roomId,
-            'game_id' => $gameId,
-            'client_lobby_url' => $lobbyUrl,
-        ]);
-
-        // omit lobbyUrl if it is empty
-        if (empty($lobbyUrl)) {
-            $lobbyUrl = null;
-        }else{
-            $lobbyUrl = $clientLobbyUrl;
-        }
-
         $payload = [
             'uid' => $uid,
             'token' => $token,
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $lobbyUrl,
+            'lobbyUrl' => $provider['game_server_url'],
             'domain' => $provider['domain'],
         ];
 
@@ -517,7 +481,7 @@ class BuffaloGameMultiSiteService
             'prefix' => $sitePrefix,
             'room_id' => $roomId,
             'game_id' => $gameId,
-            'client_lobby_url' => $lobbyUrl,
+            'client_lobby_url' => $clientLobbyUrl ?: ($siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null),
         ]);
 
         $httpOptions = ['verify' => $provider['verify_ssl']];
