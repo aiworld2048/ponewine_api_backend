@@ -371,16 +371,22 @@ class BuffaloGameMultiSiteService
         $gameId = $gameId ?? $provider['game_id'];
 
        // $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
-       $lobbyUrl = $clientLobbyUrl;
+       $lobbyUrl = null;
 
         //$lobbyUrl = $clientLobbyUrl ?: $siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null;
-
+       if(empty($lobbyUrl)) {
+        $lobbyUrl = null;
+       }
+       else {
+        $lobbyUrl = $clientLobbyUrl;
+       }
+       
         $payload = [
             'uid' => $auth['uid'],
             'token' => $auth['token'],
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $lobbyUrl,
+            'lobbyUrl' => $lobbyUrl, 
             'domain' => $provider['domain'],
         ];
 
@@ -493,6 +499,8 @@ class BuffaloGameMultiSiteService
         // omit lobbyUrl if it is empty
         if (empty($lobbyUrl)) {
             $lobbyUrl = null;
+        }else{
+            $lobbyUrl = $clientLobbyUrl;
         }
 
         $payload = [
@@ -500,7 +508,7 @@ class BuffaloGameMultiSiteService
             'token' => $token,
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $lobbyUrl ?? null,
+            'lobbyUrl' => $lobbyUrl,
             'domain' => $provider['domain'],
         ];
 
