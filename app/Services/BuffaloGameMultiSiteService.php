@@ -370,12 +370,14 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
+        $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+
         $payload = [
             'uid' => $auth['uid'],
             'token' => $auth['token'],
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $provider['game_server_url'],
+            'lobbyUrl' => $lobbyUrl,
             'domain' => $provider['domain'],
         ];
 
@@ -384,7 +386,7 @@ class BuffaloGameMultiSiteService
             'prefix' => $sitePrefix,
             'room_id' => $roomId,
             'game_id' => $gameId,
-            'client_lobby_url' => $clientLobbyUrl ?: ($siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null),
+            'client_lobby_url' => $lobbyUrl,
             'payload' => array_merge($payload, [
                 'token' => substr($payload['token'], 0, 8) . '...' . substr($payload['token'], -6),
             ]),
@@ -474,12 +476,14 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
+        $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+
         $payload = [
             'uid' => $uid,
             'token' => $token,
             'gameId' => $gameId,
             'roomId' => (string) $roomId,
-            'lobbyUrl' => $provider['game_server_url'],
+            'lobbyUrl' => $lobbyUrl,
             'domain' => $provider['domain'],
         ];
 
@@ -488,7 +492,7 @@ class BuffaloGameMultiSiteService
             'prefix' => $sitePrefix,
             'room_id' => $roomId,
             'game_id' => $gameId,
-            'client_lobby_url' => $clientLobbyUrl ?: ($siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null),
+            'client_lobby_url' => $lobbyUrl,
         ]);
 
         $httpOptions = ['verify' => $provider['verify_ssl']];
