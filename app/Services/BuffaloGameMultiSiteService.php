@@ -481,6 +481,14 @@ class BuffaloGameMultiSiteService
 
         $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
 
+        Log::info('Buffalo Multi-Site: External credential game login', [
+            'site' => $siteConfig['name'] ?? $sitePrefix,
+            'prefix' => $sitePrefix,
+            'room_id' => $roomId,
+            'game_id' => $gameId,
+            'client_lobby_url' => $lobbyUrl,
+        ]);
+
         // omit lobbyUrl if it is empty
         if (empty($lobbyUrl)) {
             $lobbyUrl = null;
