@@ -479,7 +479,8 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
-        $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+        //$lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+        $lobbyUrl = $clientLobbyUrl;
 
         Log::info('Buffalo Multi-Site: External credential game login', [
             'site' => $siteConfig['name'] ?? $sitePrefix,
