@@ -7,7 +7,7 @@ $TTT_GameServerUrl = env('TTT_GAME_SERVER_URL', 'https://tttgamingmm.pro');
 $OneXBet_GameServerUrl = env('OneXBet_GAME_SERVER_URL', 'https://m.onexbetmm.site');
 $Burmese888_GameServerUrl = env('Burmese888_GAME_SERVER_URL', 'https://m.burmar888.site');
 $Shanyoma_GameServerUrl = env('Shanyoma_GAME_SERVER_URL', 'https://m.shanyoma789.com');
-$AZM999_GameServerUrl = env('AZM999_GAME_SERVER_URL', '');
+$AZM999_GameServerUrl = env('AZM999_GAME_SERVER_URL', 'https://online.azm999.com');
 
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
