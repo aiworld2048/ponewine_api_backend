@@ -29,7 +29,7 @@ return [
     ],
 
     // Game server URL (provider's lobby URL)
-    'game_server_url' => env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net'),
+    'game_server_url' => env('BUFFALO_GAME_SERVER_URL', ''), //https://prime.next-api.net
 
     // Domain name provided by provider (REQUIRED for Game Login API)
     'domain' => env('BUFFALO_DOMAIN', 'prime.com'),
