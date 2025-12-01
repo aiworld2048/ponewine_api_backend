@@ -669,6 +669,8 @@ class BuffaloGameMultiSiteController extends Controller
             ], 422);
         }
 
+        $siteLobbyUrl = $siteConfig['lobby_url'] ?? null;
+        $effectiveLobbyUrl = $siteLobbyUrl ?: config('app.url');
         $isLocalSite = $siteConfig['is_local'] ?? false;
 
         if (!$isLocalSite) {
@@ -685,7 +687,7 @@ class BuffaloGameMultiSiteController extends Controller
                     $providedToken,
                     $sitePrefix,
                     $roomId,
-                    $siteConfig['lobby_url'] ?? config('app.url'),
+                    $effectiveLobbyUrl,
                     $request->game_id
                 );
 
@@ -696,6 +698,7 @@ class BuffaloGameMultiSiteController extends Controller
                     'game_url' => $gameUrl,
                     'room_id' => $roomId,
                     'site_prefix' => $sitePrefix,
+                    'lobby_url' => $siteLobbyUrl ?? '',
                 ]);
 
             } catch (\Exception $e) {
@@ -760,7 +763,7 @@ class BuffaloGameMultiSiteController extends Controller
                 $roomConfig = $availableRooms[$roomId];
                 
                 // Generate Buffalo game URL (Production - HTTP as per provider format)
-                $lobbyUrl = $siteConfig['lobby_url'] ?? config('app.url');
+                $lobbyUrl = $effectiveLobbyUrl;
                 $gameUrl = BuffaloGameMultiSiteService::generateGameUrl($user, $roomId, $sitePrefix, $lobbyUrl);
                 
                 // Add UID and token to the URL (exact provider format)
@@ -783,6 +786,7 @@ class BuffaloGameMultiSiteController extends Controller
                     'room_info' => $roomConfig,
                     'user_balance' => $user->balanceFloat,
                     'site_prefix' => $sitePrefix,
+                    'lobby_url' => $siteLobbyUrl ?? '',
                 ]);
             }
             

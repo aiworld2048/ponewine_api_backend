@@ -332,10 +332,17 @@ class BuffaloGameMultiSiteService
      */
     private static function resolveProviderConfig(array $siteConfig): array
     {
+        $defaultGameServer = Config::get('buffalo.game_server_url', 'https://prime.next-api.net');
+
+        $gameServerUrl = $siteConfig['game_server_url'] ?? $defaultGameServer;
+        if (!$gameServerUrl) {
+            $gameServerUrl = $defaultGameServer;
+        }
+
         return [
             'api_url' => $siteConfig['provider_api_url'] ?? Config::get('buffalo.api.url', 'https://api-ms3.african-buffalo.club/api/game-login'),
             'domain' => $siteConfig['domain'] ?? Config::get('buffalo.domain', 'prime.com'),
-            'game_server_url' => $siteConfig['game_server_url'] ?? Config::get('buffalo.game_server_url', 'https://prime.next-api.net'),
+            'game_server_url' => $gameServerUrl,
             'timeout' => $siteConfig['api_timeout'] ?? Config::get('buffalo.timeout', 30),
             'game_id' => $siteConfig['game_id'] ?? Config::get('buffalo.game_id', 23),
             'verify_ssl' => $siteConfig['verify_ssl'] ?? false,
