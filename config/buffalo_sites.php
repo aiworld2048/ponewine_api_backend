@@ -2,7 +2,7 @@
 
 $defaultProviderApiUrl = env('BUFFALO_API_URL', 'https://api-ms3.african-buffalo.club/api/game-login');
 $defaultDomain = env('BUFFALO_DOMAIN', 'prime.com');
-$defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', 'https://prime.next-api.net');
+$defaultGameServerUrl = env('BUFFALO_GAME_SERVER_URL', null); // https://prime.next-api.net
 $TTT_Lobby_Url = env('TTT_LOBBY_URL', 'https://tttgamingmm.pro');
 $OneXBet_Lobby_Url = env('ONEXBET_LOBBY_URL', 'https://m.onexbetmm.site');
 $Burmese888_Lobby_Url = env('BURMESE888_LOBBY_URL', 'https://m.burmar888.site');
