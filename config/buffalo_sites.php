@@ -233,7 +233,7 @@ return [
             'lobby_url' => env('SITE_8_LOBBY_URL', $AZM999_Lobby_Url),
             'provider_api_url' => env('SITE_8_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_8_DOMAIN', $defaultDomain),
-            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServer_Url),
+            //'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServer_Url),
             'game_id' => env('SITE_8_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_8_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_8_VERIFY_SSL', false),
