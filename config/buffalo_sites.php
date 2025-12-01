@@ -7,8 +7,8 @@ $TTT_Lobby_Url = env('TTT_LOBBY_URL', 'https://tttgamingmm.pro');
 $OneXBet_Lobby_Url = env('ONEXBET_LOBBY_URL', 'https://m.onexbetmm.site');
 $Burmese888_Lobby_Url = env('BURMESE888_LOBBY_URL', 'https://m.burmar888.site');
 $Shanyoma_Lobby_Url = env('SHANYOMA_LOBBY_URL', 'https://m.shanyoma789.com');
-$AZM999_Lobby_Url = env('AZM999_LOBBY_URL', 'https://prime.next-api.net?gameId=23&roomId=1&uid=az9qvpnudaxmdmfb05800d1d5c822cf3&token=24cc69e8577b40f07d822d9fc43ab435b4ccb018e6e20652b756c72a2cb45409&lobbyUrl=https%3A%2F%2Fonline.azm999.com'); // https://online.azm999.com
-$AZM999_GameServer_Url = env('AZM999_GAME_SERVER_URL', 'https://prime.next-api.net?gameId=23&roomId=1&uid=az9qvpnudaxmdmfb05800d1d5c822cf3&token=24cc69e8577b40f07d822d9fc43ab435b4ccb018e6e20652b756c72a2cb45409&lobbyUrl=https%3A%2F%2Fonline.azm999.com');
+$AZM999_Lobby_Url = env('AZM999_LOBBY_URL', 'https://online.azm999.com'); // https://online.azm999.com
+$AZM999_GameServer_Url = env('AZM999_GAME_SERVER_URL', 'https://online.azm999.com');
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
 
