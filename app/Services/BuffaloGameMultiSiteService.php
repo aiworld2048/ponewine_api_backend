@@ -332,8 +332,8 @@ class BuffaloGameMultiSiteService
      */
     private static function resolveProviderConfig(array $siteConfig): array
     {
-        $defaultGameServer = Config::get('buffalo.game_server_url', 'https://prime.next-api.net');
-
+        //$defaultGameServer = Config::get('buffalo.game_server_url', 'https://prime.next-api.net');
+        $defaultGameServer = '';
         $gameServerUrl = $siteConfig['game_server_url'] ?? $defaultGameServer;
         if (!$gameServerUrl) {
             $gameServerUrl = $defaultGameServer;
