@@ -370,7 +370,8 @@ class BuffaloGameMultiSiteService
         $provider = self::resolveProviderConfig($siteConfig);
         $gameId = $gameId ?? $provider['game_id'];
 
-        $lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+        //$lobbyUrl = $clientLobbyUrl ?: $provider['game_server_url'];
+        $lobbyUrl = $clientLobbyUrl ?: $siteConfig['lobby_url'] ?? $siteConfig['site_url'] ?? null;
 
         $payload = [
             'uid' => $auth['uid'],
