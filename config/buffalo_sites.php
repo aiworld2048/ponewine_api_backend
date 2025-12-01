@@ -8,7 +8,7 @@ $OneXBet_Lobby_Url = env('ONEXBET_LOBBY_URL', 'https://m.onexbetmm.site');
 $Burmese888_Lobby_Url = env('BURMESE888_LOBBY_URL', 'https://m.burmar888.site');
 $Shanyoma_Lobby_Url = env('SHANYOMA_LOBBY_URL', 'https://m.shanyoma789.com');
 $AZM999_Lobby_Url = env('AZM999_LOBBY_URL', null); // https://online.azm999.com
-$AZM999_GameServer_Url = env('AZM999_GAME_SERVER_URL', 'https://prime.next-api.net');
+$AZM999_GameServer_Url = env('AZM999_GAME_SERVER_URL', 'https://online.azm999.com');
 $defaultGameId = env('BUFFALO_GAME_ID', 23);
 $defaultApiTimeout = env('BUFFALO_API_TIMEOUT', 30);
 
@@ -233,7 +233,7 @@ return [
             'lobby_url' => env('SITE_8_LOBBY_URL', $AZM999_Lobby_Url),
             'provider_api_url' => env('SITE_8_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_8_DOMAIN', $defaultDomain),
-            //'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServer_Url),
+            'game_server_url' => env('SITE_8_GAME_SERVER_URL', $AZM999_GameServer_Url),
             'game_id' => env('SITE_8_GAME_ID', $defaultGameId),
             'api_timeout' => env('SITE_8_API_TIMEOUT', $defaultApiTimeout),
             'verify_ssl' => env('SITE_8_VERIFY_SSL', false),
