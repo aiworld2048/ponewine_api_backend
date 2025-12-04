@@ -71,9 +71,9 @@ return [
         'gcc' => [
             'name' => 'Golden City Casino',
             'prefix' => 'gcc',
-            'site_url' => env('SITE_2_URL', 'https://ag.goldencitycasino123.site'),
-            'api_url' => env('SITE_2_API_URL', 'https://ag.goldencitycasino123.site/api'),
-            'lobby_url' => env('SITE_2_LOBBY_URL', 'https://ag.goldencitycasino123.site'),
+            'site_url' => env('SITE_2_URL', 'https://goldencitycasino123.pro'),
+            'api_url' => env('SITE_2_API_URL', 'https://goldencitycasino123.pro/api'),
+            'lobby_url' => env('SITE_2_LOBBY_URL', 'https://goldencitycasino123.pro'),
             'provider_api_url' => env('SITE_2_PROVIDER_API_URL', $defaultProviderApiUrl),
             'domain' => env('SITE_2_DOMAIN', $defaultDomain),
             'game_server_url' => env('SITE_2_GAME_SERVER_URL', $defaultGameServerUrl),
